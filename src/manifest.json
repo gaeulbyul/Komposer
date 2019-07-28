@@ -1,0 +1,29 @@
+{
+  "description": "트위터 신 UI에서 트윗입력칸을 구현합니다.",
+  "manifest_version": 2,
+  "name": "Komposer",
+  "author": "Gaeulbyul <aeiou256@gmail.com>",
+  "version": "0.0.1",
+  "homepage_url": "https://github.com/gaeulbyul/Komposer",
+
+  "permissions": [
+    "https://twitter.com/*",
+    "https://api.twitter.com/*",
+    "https://mobile.twitter.com/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["*://twitter.com/*", "*://mobile.twitter.com/*"],
+      "js": [
+        "vendor/browser-polyfill.min.js",
+        "scripts/script.js"
+      ]
+    }
+  ],
+
+  "web_accessible_resources": [
+    "scripts/inject.js"
+  ]
+
+}
