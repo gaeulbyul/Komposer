@@ -1,7 +1,3 @@
-/* TODO:
-- 에모지 입력 지원
-*/
-
 {
   function dig<T>(obj: () => T): T | null {
     try {
@@ -88,7 +84,7 @@
     const currentValue = editorState.getCurrentContent().getPlainText()
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
-      placeholder: '[여기에 텍스트 입력]',
+      placeholder: '무슨 일이 일어나고 있나요?',
       value: currentValue,
       onkeypress(event: KeyboardEvent) {
         // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
