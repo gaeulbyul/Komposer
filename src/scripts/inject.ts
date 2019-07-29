@@ -72,23 +72,35 @@
     )!
     const { editor } = dig(() => getReactEventHandler(editorContentElem).children[0].props)
     const parentOfEditorRoot = editorRootElem.parentElement!
+    const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
+    const sendTweet = () => {
+      const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
+      if (!grandProps) {
+        console.error('fail to get grandProps')
+        return
+      }
+      const { sendTweetCommandName, keyCommandHandlers } = grandProps
+      const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
+      return sendTweetFn()
+    }
     parentOfEditorRoot.hidden = true
     const taContainer = document.createElement('div')
-    parentOfEditorRoot.parentElement!.prepend(taContainer)
+    grandParentOfEditorRoot.prepend(taContainer)
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
       placeholder: '[여기에 텍스트 입력]',
       // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
-      onkeydown(event: KeyboardEvent) {
-        event.stopPropagation()
-      },
       onkeypress(event: KeyboardEvent) {
         event.stopPropagation()
+        const isSubmit = event.ctrlKey && event.code === 'Enter'
+        if (isSubmit) {
+          sendTweet()
+        }
       },
       // textarea.value = editorContentElem.textContent!
       oninput() {
-        textarea.style.height='2px'
-        textarea.style.height=`${textarea.scrollHeight}px`
+        textarea.style.height = '2px'
+        textarea.style.height = `${textarea.scrollHeight}px`
         updateText(editor, textarea.value)
       },
     })
@@ -104,7 +116,7 @@
       fontSize: '20px',
       fontFamily: 'sans-serif',
       resize: 'none',
-      ...( getThemeColor() )
+      ...getThemeColor(),
     })
   }
 
