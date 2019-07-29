@@ -1,6 +1,7 @@
 /* TODO:
 - 에모지 입력 지원
 - 창 크기 바뀌면 내용 사라지는 현상
+- Ctrl+Enter 단축키 지원
 - ???
 */
 
@@ -15,6 +16,10 @@
         throw err
       }
     }
+  }
+
+  function assign<T>(obj: T, anotherObj: Partial<T>): void {
+    Object.assign(obj, anotherObj)
   }
 
   function getReactEventHandler(target: Element): any {
@@ -45,22 +50,20 @@
 
   interface ThemeColor {
     backgroundColor: string
-    textColor: string
+    color: string
   }
 
   function getThemeColor(): ThemeColor {
-    let textColor = '#000'
+    let color = '#000'
     let backgroundColor = '#fff'
-    {
-      const themeElem = document.querySelector<HTMLMetaElement>('meta[name=theme-color]')
-      if (themeElem && /^#([0-9a-f]{6})/i.test(themeElem.content)) {
-        backgroundColor = themeElem.content
-      }
-      if (!/fff/i.test(backgroundColor)) {
-        textColor = '#fff'
-      }
+    const themeElem = document.querySelector<HTMLMetaElement>('meta[name=theme-color]')
+    if (themeElem && /^#([0-9a-f]{6})/i.test(themeElem.content)) {
+      backgroundColor = themeElem.content
     }
-    return { backgroundColor, textColor }
+    if (!/fff/i.test(backgroundColor)) {
+      color = '#fff'
+    }
+    return { backgroundColor, color }
   }
 
   function applyMagic(editorRootElem: HTMLElement) {
@@ -68,41 +71,41 @@
       '.DraftEditor-editorContainer > div[contenteditable=true]'
     )!
     const { editor } = dig(() => getReactEventHandler(editorContentElem).children[0].props)
-    const shadowHost = editorRootElem.parentElement!.parentElement!
-    const anotherTextArea = shadowHost.attachShadow({ mode: 'open' })
-    const { backgroundColor, textColor } = getThemeColor()
-    anotherTextArea.innerHTML = `\
-      <div>
-        <textarea
-          placeholder="[여기에 트윗 입력]"
-          rows="3"></textarea>
-      </div>
-      <style>
-      *, *::before, *::after {
-        box-sizing: border-box;
-      }
-      div {
-        display: flex;
-      }
-      textarea {
-        display: block;
-        width: 100%;
-        border: 0;
-        background-color: ${backgroundColor};
-        color: ${textColor};
-        font-size: 18px;
-        font-family: sans-serif;
-        resize: none;
-      }
-      </style>
-    `
-    const textarea = anotherTextArea.querySelector('textarea')!
-    // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
-    textarea.onkeydown = textarea.onkeypress = event => event.stopPropagation()
-    // textarea.value = editorContentElem.textContent!
-    textarea.oninput = () => {
-      updateText(editor, textarea.value)
-    }
+    const parentOfEditorRoot = editorRootElem.parentElement!
+    parentOfEditorRoot.hidden = true
+    const taContainer = document.createElement('div')
+    parentOfEditorRoot.parentElement!.prepend(taContainer)
+    const textarea = taContainer.appendChild(document.createElement('textarea'))
+    assign(textarea, {
+      placeholder: '[여기에 텍스트 입력]',
+      // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
+      onkeydown(event: KeyboardEvent) {
+        event.stopPropagation()
+      },
+      onkeypress(event: KeyboardEvent) {
+        event.stopPropagation()
+      },
+      // textarea.value = editorContentElem.textContent!
+      oninput() {
+        textarea.style.height='2px'
+        textarea.style.height=`${textarea.scrollHeight}px`
+        updateText(editor, textarea.value)
+      },
+    })
+    assign(textarea.style, {
+      boxSizing: 'border-box',
+      display: 'block',
+      width: '100%',
+      height: '100%',
+      minHeight: '6rem',
+      maxHeight: '30rem',
+      padding: '0',
+      border: '0',
+      fontSize: '20px',
+      fontFamily: 'sans-serif',
+      resize: 'none',
+      ...( getThemeColor() )
+    })
   }
 
   function main() {
