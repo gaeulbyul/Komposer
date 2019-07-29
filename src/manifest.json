@@ -11,11 +11,7 @@
     "128": "icons/icon-128.png"
   },
 
-  "permissions": [
-    "https://twitter.com/*",
-    "https://api.twitter.com/*",
-    "https://mobile.twitter.com/*"
-  ],
+  "permissions": ["https://twitter.com/*", "https://mobile.twitter.com/*"],
 
   "content_scripts": [
     {
