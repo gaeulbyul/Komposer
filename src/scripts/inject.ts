@@ -59,6 +59,28 @@
     return { backgroundColor, color }
   }
 
+  function getPlaceholderText(editorRootElem: HTMLElement): string {
+    let placeholder = '무슨 일이 일어나고 있나요?'
+    const placeholderElem = editorRootElem.querySelector('.public-DraftEditorPlaceholder-root')
+    if (placeholderElem) {
+      const { textContent } = placeholderElem
+      if (textContent) {
+        placeholder = textContent
+      }
+    }
+    return placeholder
+  }
+
+  function sendTweet(grandParentOfEditorRoot: HTMLElement) {
+    const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
+    if (!grandProps) {
+      throw new Error('fail to get grandProps')
+    }
+    const { sendTweetCommandName, keyCommandHandlers } = grandProps
+    const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
+    return sendTweetFn()
+  }
+
   function applyMagic(editorRootElem: HTMLElement) {
     const editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]'
@@ -69,30 +91,21 @@
     const editorContainerElem = editorContentElem.parentElement!
     const parentOfEditorRoot = editorRootElem.parentElement!
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
-    const sendTweet = () => {
-      const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
-      if (!grandProps) {
-        console.error('fail to get grandProps')
-        return
-      }
-      const { sendTweetCommandName, keyCommandHandlers } = grandProps
-      const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
-      return sendTweetFn()
-    }
     parentOfEditorRoot.hidden = true
     const taContainer = document.createElement('div')
     grandParentOfEditorRoot.prepend(taContainer)
+    const placeholder = getPlaceholderText(editorRootElem)
     const currentValue = editorState.getCurrentContent().getPlainText()
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
-      placeholder: '무슨 일이 일어나고 있나요?',
+      placeholder,
       value: currentValue,
       onkeypress(event: KeyboardEvent) {
         // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
         event.stopPropagation()
         const isSubmit = event.ctrlKey && event.code === 'Enter'
         if (isSubmit) {
-          sendTweet()
+          sendTweet(grandParentOfEditorRoot)
         }
       },
       onpaste(event: ClipboardEvent) {
