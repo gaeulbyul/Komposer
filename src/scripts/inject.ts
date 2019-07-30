@@ -66,6 +66,7 @@
     const { editor, editorState } = dig(
       () => getReactEventHandler(editorContentElem).children[0].props
     )
+    const editorContainerElem = editorContentElem.parentElement!
     const parentOfEditorRoot = editorRootElem.parentElement!
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
     const sendTweet = () => {
@@ -92,6 +93,20 @@
         const isSubmit = event.ctrlKey && event.code === 'Enter'
         if (isSubmit) {
           sendTweet()
+        }
+      },
+      onpaste(event: ClipboardEvent) {
+        const { clipboardData } = event
+        if (!clipboardData) {
+          return
+        }
+        const isPlainText = clipboardData.types[0] === 'text/plain'
+        if (isPlainText) {
+          return
+        }
+        const onPaste = dig(() => getReactEventHandler(editorContainerElem).children.props.onPaste)
+        if (typeof onPaste === 'function') {
+          onPaste(event)
         }
       },
       oninput() {
