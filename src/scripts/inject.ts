@@ -132,22 +132,20 @@
   }
 
   function main() {
+    function applyMagicEach(elems: NodeListOf<HTMLElement>) {
+      elems.forEach(applyMagic)
+    }
     new MutationObserver(mutations => {
       for (const elem of getAddedElementsFromMutations(mutations)) {
-        const editorRootElem = elem.querySelector<HTMLElement>('.DraftEditor-root')
-        if (!editorRootElem) {
-          continue
-        }
-        applyMagic(editorRootElem)
+        const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
+        applyMagicEach(editorRootElems)
       }
     }).observe(document.body, {
       subtree: true,
       characterData: true,
       childList: true,
     })
-    Array.from(document.querySelectorAll<HTMLElement>('.DraftEditor-root')).forEach(elem =>
-      applyMagic(elem)
-    )
+    applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
   }
 
   function initialize() {
