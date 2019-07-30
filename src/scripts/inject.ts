@@ -98,6 +98,8 @@
     grandParentOfEditorRoot.prepend(taContainer)
     const placeholder = getPlaceholderText(editorRootElem)
     const currentValue = editorState.getCurrentContent().getPlainText()
+    const progressBar = document.querySelector('div[role="progressbar"]')
+    (progressBar.parentElement.previousElementSibling).append(progressBar.parentElement)
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
       placeholder,
