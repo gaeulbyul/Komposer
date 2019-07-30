@@ -98,8 +98,16 @@
     grandParentOfEditorRoot.prepend(taContainer)
     const placeholder = getPlaceholderText(editorRootElem)
     const currentValue = editorState.getCurrentContent().getPlainText()
-    const progressBar = document.querySelector('div[role="progressbar"]')
-    (progressBar.parentElement.previousElementSibling).append(progressBar.parentElement)
+    const tweetProgressBar = document.querySelector('div[role="progressbar"]')
+    if (tweetProgressBar) {
+      (tweetProgressBar.parentElement.previousElementSibling).append(tweetProgressBar.parentElement)
+    }
+    else {
+      const tweetAnchor = document.querySelector('a[href="/compose/tweet"][role="link"]')
+      if (tweetAnchor) {
+        (tweetAnchor.previousElementSibling).append(tweetAnchor)
+      }
+    }
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
       placeholder,
