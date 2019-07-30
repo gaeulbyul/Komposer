@@ -91,6 +91,8 @@
     const editorContainerElem = editorContentElem.parentElement!
     const parentOfEditorRoot = editorRootElem.parentElement!
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
+    const activeElement = document.activeElement
+    const shouldFocusAfterMagic = editorRootElem.contains(activeElement)
     parentOfEditorRoot.hidden = true
     const taContainer = document.createElement('div')
     grandParentOfEditorRoot.prepend(taContainer)
@@ -142,6 +144,9 @@
       resize: 'none',
       ...getThemeColor(),
     })
+    if (shouldFocusAfterMagic) {
+      textarea.focus()
+    }
   }
 
   function main() {
