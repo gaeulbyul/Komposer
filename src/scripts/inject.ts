@@ -1,4 +1,5 @@
 {
+  const EVENT_EMOJI_PICK = 'Komposer::EMOJI_PICK'
   function dig<T>(obj: () => T): T | null {
     try {
       return obj()
@@ -27,6 +28,18 @@
   ): IterableIterator<HTMLElement> {
     for (const { addedNodes } of mutations) {
       for (const node of addedNodes) {
+        if (node instanceof HTMLElement) {
+          yield node
+        }
+      }
+    }
+  }
+
+  function* getRemovedElementsFromMutations(
+    mutations: MutationRecord[]
+  ): IterableIterator<HTMLElement> {
+    for (const { removedNodes } of mutations) {
+      for (const node of removedNodes) {
         if (node instanceof HTMLElement) {
           yield node
         }
@@ -75,6 +88,28 @@
     sendDMButton.click()
   }
 
+  function integrateEmojiPicker() {
+    document.addEventListener('click', event => {
+      const { target } = event
+      if (!(target instanceof HTMLElement)) {
+        return
+      }
+      const isTargetEmoji = target.matches('#emoji_picker_categories_dom_id div[style*="twemoji"]')
+      if (!isTargetEmoji) {
+        return
+      }
+      const compo = target.parentElement!.parentElement!
+      const { emoji } = dig(() => getReactEventHandler(compo).children.props)
+      document.dispatchEvent(
+        new CustomEvent(EVENT_EMOJI_PICK, {
+          detail: emoji,
+        })
+      )
+    })
+  }
+
+  const emojiEventMap = new WeakMap<HTMLElement, (evt: Event) => void>()
+
   function applyMagic(editorRootElem: HTMLElement) {
     const editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]'
@@ -104,6 +139,7 @@
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     assign(textarea, {
       placeholder,
+      className: 'komposer',
       value: currentValue,
       title: '(Komposer 확장기능으로 대체한 입력칸입니다.)',
       onkeypress(event: KeyboardEvent) {
@@ -158,6 +194,15 @@
     if (shouldFocusAfterMagic) {
       textarea.focus()
     }
+    const emojiEventHandler = (event: Event) => {
+      if (!(event instanceof CustomEvent)) {
+        return
+      }
+      const emoji = event.detail
+      textarea.value += emoji.unified
+    }
+    emojiEventMap.set(textarea, emojiEventHandler)
+    document.addEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
   }
 
   function main() {
@@ -169,12 +214,25 @@
         const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
         applyMagicEach(editorRootElems)
       }
+      for (const elem of getRemovedElementsFromMutations(mutations)) {
+        // textarea가 사라지면 event를 정리한다
+        const tas = elem.querySelectorAll<HTMLElement>('textarea.komposer')
+        for (const ta of tas) {
+          const handler = emojiEventMap.get(ta)
+          if (!handler) {
+            continue
+          }
+          document.removeEventListener(EVENT_EMOJI_PICK, handler)
+          emojiEventMap.delete(ta)
+        }
+      }
     }).observe(document.body, {
       subtree: true,
       characterData: true,
       childList: true,
     })
     applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
+    integrateEmojiPicker()
   }
 
   function initialize() {
