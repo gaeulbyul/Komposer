@@ -111,6 +111,10 @@
   const emojiEventMap = new WeakMap<HTMLElement, (evt: Event) => void>()
 
   function applyMagic(editorRootElem: HTMLElement) {
+    if (editorRootElem.classList.contains('komposer-applied')) {
+      return
+    }
+    editorRootElem.classList.add('komposer-applied')
     const editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]'
     )!
