@@ -98,6 +98,7 @@
       if (!isTargetEmoji) {
         return
       }
+      event.stopPropagation()
       const compo = target.parentElement!.parentElement!
       const { emoji } = dig(() => getReactEventHandler(compo).children.props)
       document.dispatchEvent(
@@ -203,10 +204,22 @@
         return
       }
       const emoji = event.detail
-      textarea.value += emoji.unified
+      insertAtCursor(textarea, emoji.unified)
+      updateText(editor, textarea.value)
     }
     emojiEventMap.set(textarea, emojiEventHandler)
     document.addEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
+  }
+
+  // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
+  function insertAtCursor(input: HTMLTextAreaElement, textToInsert: string) {
+    const { value, selectionStart, selectionEnd } = input
+
+    // update the value with our text inserted
+    input.value = value.slice(0, selectionStart) + textToInsert + value.slice(selectionEnd)
+
+    // update cursor to be at the end of insertion
+    input.selectionStart = input.selectionEnd = selectionStart + textToInsert.length
   }
 
   function main() {
