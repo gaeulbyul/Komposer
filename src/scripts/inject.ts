@@ -41,24 +41,6 @@
     editor.update(edits)
   }
 
-  interface ThemeColor {
-    backgroundColor: string
-    color: string
-  }
-
-  function getThemeColor(): ThemeColor {
-    let color = '#000'
-    let backgroundColor = '#fff'
-    const themeElem = document.querySelector<HTMLMetaElement>('meta[name=theme-color]')
-    if (themeElem && /^#([0-9a-f]{6})/i.test(themeElem.content)) {
-      backgroundColor = themeElem.content
-    }
-    if (!/fff/i.test(backgroundColor)) {
-      color = '#fff'
-    }
-    return { backgroundColor, color }
-  }
-
   function getPlaceholderText(editorRootElem: HTMLElement): string {
     let placeholder = '무슨 일이 일어나고 있나요?'
     const placeholderElem = editorRootElem.querySelector('.public-DraftEditorPlaceholder-root')
@@ -123,6 +105,7 @@
     assign(textarea, {
       placeholder,
       value: currentValue,
+      title: '(Komposer 확장기능으로 대체한 입력칸입니다.)',
       onkeypress(event: KeyboardEvent) {
         // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
         event.stopPropagation()
@@ -165,10 +148,12 @@
       maxHeight: '30rem',
       padding: '0',
       border: '0',
-      fontSize: '20px',
+      fontSize: 'inherit',
       fontFamily: 'sans-serif',
       resize: 'none',
-      ...getThemeColor(),
+      backgroundColor: 'inherit',
+      color: 'inherit',
+      outline: '0',
     })
     if (shouldFocusAfterMagic) {
       textarea.focus()
