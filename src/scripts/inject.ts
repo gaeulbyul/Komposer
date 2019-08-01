@@ -81,6 +81,18 @@
     return sendTweetFn()
   }
 
+  function sendDM() {
+    const sendDMButton = document.querySelector<HTMLElement>('[data-testid="dmComposerSendButton"]')
+    if (!sendDMButton) {
+      throw new Error(`can't find dmComposerSendButton!`)
+    }
+    const disabled = sendDMButton.getAttribute('aria-disabled') === 'true'
+    if (disabled) {
+      return
+    }
+    sendDMButton.click()
+  }
+
   function applyMagic(editorRootElem: HTMLElement) {
     const editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]'
@@ -91,6 +103,15 @@
     const editorContainerElem = editorContentElem.parentElement!
     const parentOfEditorRoot = editorRootElem.parentElement!
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
+    const isDMInput =
+      dig(() => {
+        try {
+          const { testID } = getReactEventHandler(grandParentOfEditorRoot).children.props
+          return testID === 'dmComposerTextInput'
+        } catch (e) {
+          return false
+        }
+      }) || false
     const activeElement = document.activeElement
     const shouldFocusAfterMagic = editorRootElem.contains(activeElement)
     parentOfEditorRoot.hidden = true
@@ -107,7 +128,12 @@
         event.stopPropagation()
         const isSubmit = event.ctrlKey && event.code === 'Enter'
         if (isSubmit) {
-          sendTweet(grandParentOfEditorRoot)
+          if (isDMInput) {
+            sendDM()
+            textarea.value = ''
+          } else {
+            sendTweet(grandParentOfEditorRoot)
+          }
         }
       },
       onpaste(event: ClipboardEvent) {
