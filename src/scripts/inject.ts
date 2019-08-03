@@ -218,7 +218,7 @@
       display: 'block',
       width: '100%',
       height: '100%',
-      minHeight: '6rem',
+      minHeight: '1rem',
       maxHeight: '30rem',
       padding: '0',
       border: '0',
