@@ -111,6 +111,32 @@
 
   const emojiEventMap = new WeakMap<HTMLElement, (evt: Event) => void>()
 
+  const enum HowToHandleEnterKey {
+    SendTweet,
+    SendDM,
+    LineBreak,
+  }
+
+  function handleEnterKey(event: KeyboardEvent, isDMInput: boolean): HowToHandleEnterKey {
+    if (event.code !== 'Enter') {
+      throw new Error('I can only handle Enter key')
+    }
+    const { ctrlKey, shiftKey } = event
+    if (isDMInput) {
+      if (shiftKey) {
+        return HowToHandleEnterKey.LineBreak
+      } else {
+        return HowToHandleEnterKey.SendDM
+      }
+    } else {
+      if (ctrlKey) {
+        return HowToHandleEnterKey.SendTweet
+      } else {
+        return HowToHandleEnterKey.LineBreak
+      }
+    }
+  }
+
   function applyMagic(editorRootElem: HTMLElement) {
     if (editorRootElem.classList.contains('komposer-applied')) {
       return
@@ -150,13 +176,20 @@
       onkeypress(event: KeyboardEvent) {
         // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
         event.stopPropagation()
-        const isSubmit = event.ctrlKey && event.code === 'Enter'
-        if (isSubmit) {
-          if (isDMInput) {
-            sendDM()
-            textarea.value = ''
-          } else {
-            sendTweet(grandParentOfEditorRoot)
+        const { code } = event
+        if (code === 'Enter') {
+          const how = handleEnterKey(event, isDMInput)
+          if (how !== HowToHandleEnterKey.LineBreak) {
+            event.preventDefault()
+          }
+          switch (how) {
+            case HowToHandleEnterKey.SendDM:
+              sendDM()
+              textarea.value = ''
+              break
+            case HowToHandleEnterKey.SendTweet:
+              sendTweet(grandParentOfEditorRoot)
+              break
           }
         }
       },
