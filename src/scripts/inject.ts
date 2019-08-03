@@ -137,6 +137,11 @@
     }
   }
 
+  function fitTextareaHeight(textarea: HTMLTextAreaElement) {
+    textarea.style.height = '2px'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }
+
   function applyMagic(editorRootElem: HTMLElement) {
     if (editorRootElem.classList.contains('komposer-applied')) {
       return
@@ -208,8 +213,7 @@
         }
       },
       oninput() {
-        textarea.style.height = '2px'
-        textarea.style.height = `${textarea.scrollHeight}px`
+        fitTextareaHeight(textarea)
         updateText(editor, textarea.value)
       },
     })
@@ -217,8 +221,6 @@
       boxSizing: 'border-box',
       display: 'block',
       width: '100%',
-      height: '100%',
-      minHeight: '1rem',
       maxHeight: '30rem',
       padding: '0',
       border: '0',
@@ -229,9 +231,13 @@
       color: 'inherit',
       outline: '0',
     })
+    if (textarea.matches('div[aria-modal=true] textarea.komposer')) {
+      textarea.style.minHeight = '6rem'
+    }
     if (shouldFocusAfterMagic) {
       textarea.focus()
     }
+    fitTextareaHeight(textarea)
     const emojiEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
         return
