@@ -1,5 +1,16 @@
 {
   const EVENT_EMOJI_PICK = 'Komposer::EMOJI_PICK'
+  const EVENT_SENDING = 'Komposer::SENDING'
+  type EventHandler = (event: Event) => void
+  const emojiEventMap = new WeakMap<HTMLElement, EventHandler>()
+  const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
+
+  const enum HowToHandleEnterKey {
+    SendTweet,
+    SendDM,
+    LineBreak,
+  }
+
   function dig<T>(obj: () => T): T | null {
     try {
       return obj()
@@ -134,12 +145,31 @@
     })
   }
 
-  const emojiEventMap = new WeakMap<HTMLElement, (evt: Event) => void>()
+  const progressbarObserver = new MutationObserver(mutations => {
+    const { target } = mutations[0]
+    if (!(target instanceof HTMLElement)) {
+      return
+    }
+    const valuenow = target.getAttribute('aria-valuenow')
+    const realValue = parseInt(valuenow || '0', 10) || 0
+    const disabled = realValue > 0
+    document.dispatchEvent(
+      new CustomEvent(EVENT_SENDING, {
+        detail: {
+          disabled,
+        },
+      })
+    )
+  })
 
-  const enum HowToHandleEnterKey {
-    SendTweet,
-    SendDM,
-    LineBreak,
+  function observeProgressBar(elem: HTMLElement) {
+    if (!elem.matches('[role=progressbar]')) {
+      throw new Error('unexpected: non progressbar')
+    }
+    progressbarObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['aria-valuenow'],
+    })
   }
 
   function handleEnterKey(event: KeyboardEvent, isDMInput: boolean): HowToHandleEnterKey {
@@ -274,8 +304,21 @@
       insertAtCursor(textarea, emoji.unified)
       updateText(editor, textarea.value)
     }
-    emojiEventMap.set(textarea, emojiEventHandler)
     document.addEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
+    emojiEventMap.set(textarea, emojiEventHandler)
+    const sendingEventHandler = (event: Event) => {
+      if (!(event instanceof CustomEvent)) {
+        return
+      }
+      const { disabled } = event.detail
+      textarea.disabled = disabled
+      assign(textarea.style, {
+        opacity: disabled ? '.5' : '1',
+        cursor: disabled ? 'not-allowed' : 'text',
+      })
+    }
+    document.addEventListener(EVENT_SENDING, sendingEventHandler)
+    sendingEventMap.set(textarea, sendingEventHandler)
   }
 
   // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
@@ -293,21 +336,30 @@
     function applyMagicEach(elems: NodeListOf<HTMLElement>) {
       elems.forEach(applyMagic)
     }
+    function observerProgressBarEach(elems: NodeListOf<HTMLElement>) {
+      elems.forEach(observeProgressBar)
+    }
     new MutationObserver(mutations => {
       for (const elem of getAddedElementsFromMutations(mutations)) {
         const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
         applyMagicEach(editorRootElems)
+        const progressbars = elem.querySelectorAll<HTMLElement>('[role=progressbar]')
+        observerProgressBarEach(progressbars)
       }
       for (const elem of getRemovedElementsFromMutations(mutations)) {
         // textarea가 사라지면 event를 정리한다
-        const tas = elem.querySelectorAll<HTMLElement>('textarea.komposer')
-        for (const ta of tas) {
-          const handler = emojiEventMap.get(ta)
-          if (!handler) {
-            continue
+        const textareas = elem.querySelectorAll<HTMLElement>('textarea.komposer')
+        for (const textarea of textareas) {
+          const emojiEventHandler = emojiEventMap.get(textarea)
+          const sendingEventHandler = sendingEventMap.get(textarea)
+          if (emojiEventHandler) {
+            document.removeEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
+            emojiEventMap.delete(textarea)
           }
-          document.removeEventListener(EVENT_EMOJI_PICK, handler)
-          emojiEventMap.delete(ta)
+          if (sendingEventHandler) {
+            document.removeEventListener(EVENT_SENDING, sendingEventHandler)
+            sendingEventMap.delete(textarea)
+          }
         }
       }
     }).observe(document.body, {
@@ -316,6 +368,7 @@
       childList: true,
     })
     applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
+    observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
     integrateEmojiPicker()
   }
 
