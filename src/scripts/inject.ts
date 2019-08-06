@@ -47,6 +47,31 @@
     }
   }
 
+  function closestWith(
+    elem: HTMLElement,
+    filteringFn: (elem: HTMLElement) => boolean
+  ): HTMLElement | null {
+    let { parentElement } = elem
+    while (parentElement) {
+      const filterResult = filteringFn(parentElement)
+      if (filterResult) {
+        return parentElement
+      } else {
+        parentElement = parentElement.parentElement
+      }
+    }
+    return null
+  }
+
+  function isActiveTextarea(textarea: HTMLTextAreaElement): boolean {
+    const closest = closestWith(textarea, elem => {
+      const key = dig(() => getReactEventHandler(elem).children.key)
+      return key && /^\.\$composer-\d+$/.test(key)
+    })
+    const toolBar = closest && closest.querySelector('[data-testid=toolBar]')
+    return toolBar != null
+  }
+
   function updateText(editor: any, text: string) {
     const { editorState } = editor.props
     const conts = editorState.getCurrentContent().constructor.createFromText(text)
@@ -240,6 +265,9 @@
     fitTextareaHeight(textarea)
     const emojiEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
+        return
+      }
+      if (!isActiveTextarea(textarea)) {
         return
       }
       const emoji = event.detail
