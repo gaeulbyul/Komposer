@@ -258,8 +258,8 @@
         if (!clipboardData) {
           return
         }
-        const isPlainText = clipboardData.types[0] === 'text/plain'
-        if (isPlainText) {
+        const textData = clipboardData.getData('text')
+        if (textData) {
           return
         }
         const onPaste = dig(() => getReactEventHandler(editorContainerElem).children.props.onPaste)
