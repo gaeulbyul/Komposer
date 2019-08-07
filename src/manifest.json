@@ -1,9 +1,9 @@
 {
-  "description": "트위터 신 UI에서 트윗입력칸을 구현합니다.",
   "manifest_version": 2,
   "name": "Komposer",
+  "description": "트위터 신 UI에서 트윗입력칸을 구현합니다.",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "homepage_url": "https://github.com/gaeulbyul/Komposer",
   "icons": {
     "48": "icons/icon-48.png",

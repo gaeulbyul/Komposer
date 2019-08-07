@@ -1,3 +1,9 @@
+## v0.0.7
+
+- 전송 도중 입력칸 내용을 바꿀 수 있는 버그 고침 [#5](https://github.com/gaeulbyul/Komposer/issues/5)
+- 일부 조건에서 붙여넣기가 제대로 작동하지 않는 버그 고침 [#6](https://github.com/gaeulbyul/Komposer/issues/6)
+- 트윗타래 작성시 에모지 입력기를 사용하면 전체 트윗에 삽입되는 버그 고침
+
 ## v0.0.6
 
 - 입력칸의 높이를 기존 입력칸처럼 조정함
