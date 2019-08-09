@@ -267,6 +267,15 @@
     if (sendDMButton) {
       sendDMButton.addEventListener('click', _event => {
         textarea.value = ''
+        // 그냥 focus 하면 글자입력을 할 수 없다.
+        // 이 시점에서 이미 activeElement 는 textarea 라서
+        // .focus() 메서드를 호출해도 별다른 동작을 하지 않는것으로 추정(?)
+        setTimeout(() => {
+          if (textarea.isSameNode(document.activeElement)) {
+            textarea.blur()
+            textarea.focus()
+          }
+        }, 50)
       })
     }
     const emojiEventHandler = (event: Event) => {
