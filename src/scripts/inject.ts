@@ -260,23 +260,6 @@
         updateText(editor, textarea.value)
       },
     })
-    assign(textarea.style, {
-      boxSizing: 'border-box',
-      display: 'block',
-      width: '100%',
-      maxHeight: '30rem',
-      padding: '0',
-      border: '0',
-      fontSize: 'inherit',
-      fontFamily: 'sans-serif',
-      resize: 'none',
-      backgroundColor: 'inherit',
-      color: 'inherit',
-      outline: '0',
-    })
-    if (textarea.matches('div[aria-modal=true] textarea.komposer')) {
-      textarea.style.minHeight = '6rem'
-    }
     if (shouldFocusAfterMagic) {
       textarea.focus()
     }
@@ -305,10 +288,6 @@
       }
       const { disabled } = event.detail
       textarea.disabled = disabled
-      assign(textarea.style, {
-        opacity: disabled ? '.5' : '1',
-        cursor: disabled ? 'not-allowed' : 'text',
-      })
     }
     document.addEventListener(EVENT_SENDING, sendingEventHandler)
     sendingEventMap.set(textarea, sendingEventHandler)

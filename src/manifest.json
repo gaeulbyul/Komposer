@@ -16,6 +16,7 @@
   "content_scripts": [
     {
       "matches": ["*://twitter.com/*", "*://mobile.twitter.com/*"],
+      "css": ["styles/komposer.css"],
       "js": ["vendor/browser-polyfill.min.js", "scripts/script.js"]
     }
   ],
