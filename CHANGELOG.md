@@ -1,3 +1,7 @@
+## v0.0.9
+
+- DM 전송 후 입력칸에 다시 focus가 가도록 함
+
 ## v0.0.8
 
 - 버튼 클릭으로 DM 전송하면 입력칸이 비워지지 않는 버그 고침 [#7](https://github.com/gaeulbyul/Komposer/issues/7)
