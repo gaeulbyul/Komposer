@@ -112,11 +112,7 @@
     return sendTweetFn()
   }
 
-  function sendDM() {
-    const sendDMButton = document.querySelector<HTMLElement>('[data-testid="dmComposerSendButton"]')
-    if (!sendDMButton) {
-      throw new Error(`can't find dmComposerSendButton!`)
-    }
+  function sendDM(sendDMButton: HTMLElement) {
     const disabled = sendDMButton.getAttribute('aria-disabled') === 'true'
     if (disabled) {
       return
@@ -211,15 +207,8 @@
     const editorContainerElem = editorContentElem.parentElement!
     const parentOfEditorRoot = editorRootElem.parentElement!
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
-    const isDMInput =
-      dig(() => {
-        try {
-          const { testID } = getReactEventHandler(grandParentOfEditorRoot).children.props
-          return testID === 'dmComposerTextInput'
-        } catch (e) {
-          return false
-        }
-      }) || false
+    const sendDMButton = document.querySelector<HTMLElement>('[data-testid="dmComposerSendButton"]')
+    const isDMInput = sendDMButton != null
     const activeElement = document.activeElement
     const shouldFocusAfterMagic = editorRootElem.contains(activeElement)
     parentOfEditorRoot.hidden = true
@@ -244,8 +233,7 @@
           }
           switch (how) {
             case HowToHandleEnterKey.SendDM:
-              sendDM()
-              textarea.value = ''
+              sendDM(sendDMButton!)
               break
             case HowToHandleEnterKey.SendTweet:
               sendTweet(grandParentOfEditorRoot)
@@ -293,6 +281,11 @@
       textarea.focus()
     }
     fitTextareaHeight(textarea)
+    if (sendDMButton) {
+      sendDMButton.addEventListener('click', _event => {
+        textarea.value = ''
+      })
+    }
     const emojiEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
         return
