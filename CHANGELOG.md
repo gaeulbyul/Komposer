@@ -1,3 +1,7 @@
+## v0.0.8
+
+- 버튼 클릭으로 DM 전송하면 입력칸이 비워지지 않는 버그 고침 [#7](https://github.com/gaeulbyul/Komposer/issues/7)
+
 ## v0.0.7
 
 - 전송 도중 입력칸 내용을 바꿀 수 있는 버그 고침 [#5](https://github.com/gaeulbyul/Komposer/issues/5)
