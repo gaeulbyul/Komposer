@@ -1,3 +1,8 @@
+.komposer {
+  --placeholder-color: #9197a3;
+  --placeholder-color-focused: #bdc1c9;
+}
+
 textarea.komposer {
   box-sizing: border-box;
   display: block;
@@ -18,6 +23,33 @@ textarea.komposer:disabled {
   opacity: 0.5;
 }
 
+/* 작은 화면 (모바일) */
+main[role='main'] textarea.komposer {
+  min-height: 8rem;
+}
+
+/* 넓은 화면 (데스크탑, 3칼럼 구조, 타임라인 상단부분) */
+main[role='main'] div[data-testid='primaryColumn'] textarea.komposer {
+  min-height: initial;
+}
+
 div[aria-modal='true'] textarea.komposer {
   min-height: 6rem;
+}
+
+/* https://css-tricks.com/almanac/selectors/p/placeholder/ */
+textarea.komposer::-moz-placeholder {
+  color: var(--placeholder-color);
+}
+
+textarea.komposer:focus::-moz-placeholder {
+  color: var(--placeholder-color-focused);
+}
+
+textarea.komposer::-webkit-input-placeholder {
+  color: var(--placeholder-color);
+}
+
+textarea.komposer:focus::-webkit-input-placeholder {
+  color: var(--placeholder-color-focused);
 }
