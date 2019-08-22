@@ -1,9 +1,8 @@
 {
-  const EVENT_EMOJI_PICK = 'Komposer::EMOJI_PICK'
   const EVENT_SENDING = 'Komposer::SENDING'
   type EventHandler = (event: Event) => void
-  const emojiEventMap = new WeakMap<HTMLElement, EventHandler>()
   const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
+  const textareaToEditorMap = new WeakMap<HTMLTextAreaElement, any>()
 
   const enum HowToHandleEnterKey {
     SendTweet,
@@ -74,13 +73,26 @@
     return null
   }
 
-  function isActiveTextarea(textarea: HTMLTextAreaElement): boolean {
-    const closest = closestWith(textarea, elem => {
-      const key = dig(() => getReactEventHandler(elem).children.key)
-      return key && /^\.\$composer-\d+$/.test(key)
+  function findActiveTextarea(): HTMLTextAreaElement | null {
+    let komposers = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+    if (komposers.length === 0) {
+      return null
+    } else if (komposers.length === 1) {
+      return komposers[0]
+    }
+    const toolBar = document.querySelector<HTMLElement>('[data-testid=toolBar]')
+    if (!toolBar) {
+      return null
+    }
+    const closest = closestWith(toolBar, elem => {
+      komposers = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+      return komposers.length === 1
     })
-    const toolBar = closest && closest.querySelector('[data-testid=toolBar]')
-    return toolBar != null
+    if (closest) {
+      return komposers[0]
+    } else {
+      return null
+    }
   }
 
   function updateText(editor: any, text: string) {
@@ -133,11 +145,13 @@
       event.stopPropagation()
       const compo = target.parentElement!.parentElement!
       const { emoji } = dig(() => getReactEventHandler(compo).children.props)
-      document.dispatchEvent(
-        new CustomEvent(EVENT_EMOJI_PICK, {
-          detail: emoji,
-        })
-      )
+      const activeTextarea = findActiveTextarea()
+      if (!activeTextarea) {
+        return
+      }
+      const activeEditor = textareaToEditorMap.get(activeTextarea)!
+      insertAtCursor(activeTextarea, emoji.unified)
+      updateText(activeEditor, activeTextarea.value)
     })
   }
 
@@ -217,6 +231,7 @@
     const placeholder = getPlaceholderText(editorRootElem)
     const currentValue = editorState.getCurrentContent().getPlainText()
     const textarea = taContainer.appendChild(document.createElement('textarea'))
+    textareaToEditorMap.set(textarea, editor)
     assign(textarea, {
       placeholder,
       className: 'komposer',
@@ -278,19 +293,6 @@
         }, 50)
       })
     }
-    const emojiEventHandler = (event: Event) => {
-      if (!(event instanceof CustomEvent)) {
-        return
-      }
-      if (!isActiveTextarea(textarea)) {
-        return
-      }
-      const emoji = event.detail
-      insertAtCursor(textarea, emoji.unified)
-      updateText(editor, textarea.value)
-    }
-    document.addEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
-    emojiEventMap.set(textarea, emojiEventHandler)
     const sendingEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
         return
@@ -329,14 +331,10 @@
       }
       for (const elem of getRemovedElementsFromMutations(mutations)) {
         // textarea가 사라지면 event를 정리한다
-        const textareas = elem.querySelectorAll<HTMLElement>('textarea.komposer')
+        const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
         for (const textarea of textareas) {
-          const emojiEventHandler = emojiEventMap.get(textarea)
+          textareaToEditorMap.delete(textarea)
           const sendingEventHandler = sendingEventMap.get(textarea)
-          if (emojiEventHandler) {
-            document.removeEventListener(EVENT_EMOJI_PICK, emojiEventHandler)
-            emojiEventMap.delete(textarea)
-          }
           if (sendingEventHandler) {
             document.removeEventListener(EVENT_SENDING, sendingEventHandler)
             sendingEventMap.delete(textarea)
