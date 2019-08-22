@@ -28,6 +28,11 @@ main[role='main'] textarea.komposer {
   min-height: 8rem;
 }
 
+/* DM 넓은 화면 */
+main[role='main'] aside[role='complementary'] textarea.komposer {
+  min-height: initial;
+}
+
 /* 넓은 화면 (데스크탑, 3칼럼 구조, 타임라인 상단부분) */
 main[role='main'] div[data-testid='primaryColumn'] textarea.komposer {
   min-height: initial;
