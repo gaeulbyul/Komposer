@@ -261,22 +261,21 @@
           }
         }
       },
-      // 요게 없으면 드롭이 안되더라.
       ondragover(event: DragEvent) {
+        // 요게 없으면 드롭이 안되더라.
         event.stopPropagation()
       },
       ondrop(event: DragEvent) {
         event.stopPropagation()
-        const textData = event.dataTransfer!.getData('text')
-        if (textData) {
-          updateText(editor, textarea.value)
-          fitTextareaHeight(textarea)
-        }
-        // 여기서 onDrop은 텍스트 삽입을 해주진 않고,
-        // 드래그/드롭시 입력칸 주위에 나타나는 점선 테두리를 없애는 역할을 해준다.
         const onDrop = dig(() => getReactEventHandler(dropTarget!).onDrop)
-        if (typeof onDrop === 'function') {
-          // setTimeout 없이 곧바로 호출하면 텍스트 삽입이 되지 않는다.
+        const items = event.dataTransfer!.items
+        const isMedia = items[0] && !items[0].type.startsWith('text/')
+        if (isMedia) {
+          onDrop(event)
+        } else {
+          // 여기서 onDrop은 텍스트 삽입을 해주진 않고,
+          // 드래그/드롭시 입력칸 주위에 나타나는 점선 테두리를 없애는 역할을 해준다.
+          // 단, setTimeout 없이 곧바로 호출하면 텍스트 삽입이 되지 않는다.
           window.setTimeout(() => {
             onDrop(event)
           })
