@@ -152,6 +152,7 @@
       const activeEditor = textareaToEditorMap.get(activeTextarea)!
       insertAtCursor(activeTextarea, emoji.unified)
       updateText(activeEditor, activeTextarea.value)
+      fitTextareaHeight(activeTextarea)
     })
   }
 
