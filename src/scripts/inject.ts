@@ -264,6 +264,8 @@
       ondragover(event: DragEvent) {
         // 요게 없으면 드롭이 안되더라.
         event.stopPropagation()
+        // 요건 파이어폭스에선 필요함
+        event.preventDefault()
       },
       ondrop(event: DragEvent) {
         event.stopPropagation()
