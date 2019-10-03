@@ -21,6 +21,8 @@
     "not dead"
   ],
   "devDependencies": {
+    "@types/lodash": "^4.14.141",
+    "@types/twitter-text": "^2.0.0",
     "@typescript-eslint/parser": "^1.6.0",
     "eslint": "^5.16.0",
     "eslint-plugin-compat": "^3.1.1",

@@ -23,6 +23,14 @@ textarea.komposer:disabled {
   opacity: 0.5;
 }
 
+.komposer-suggest-item {
+  display: block;
+  padding: 15px;
+  background-color: inherit;
+  color: inherit;
+  border: 1px solid grey;
+}
+
 /* 작은 화면 (모바일) */
 main[role='main'] textarea.komposer {
   min-height: 8rem;

@@ -1,6 +1,5 @@
 {
   const EVENT_SENDING = 'Komposer::SENDING'
-  type EventHandler = (event: Event) => void
   const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
   const textareaToEditorMap = new WeakMap<HTMLTextAreaElement, any>()
 
@@ -208,6 +207,55 @@
     textarea.style.height = `${textarea.scrollHeight}px`
   }
 
+  async function suggest(
+    textarea: HTMLTextAreaElement,
+    callback: (suggestFrom: SuggestFrom | null, result: TypeaheadResult | null) => void
+  ) {
+    const { value: text, selectionEnd } = textarea
+    const mentions = twttr.txt.extractMentionsWithIndices(text)
+    const hashtags = twttr.txt.extractHashtagsWithIndices(text)
+    let suggestFrom: SuggestFrom | null = null
+    for (const mention of mentions) {
+      const { indices, screenName } = mention
+      if (selectionEnd === indices[1]) {
+        suggestFrom = {
+          indices,
+          type: 'mention',
+          value: screenName,
+        }
+        break
+      }
+    }
+    for (const tag of hashtags) {
+      const { indices, hashtag } = tag
+      if (selectionEnd === indices[1]) {
+        suggestFrom = {
+          indices,
+          type: 'hashtag',
+          value: hashtag,
+        }
+        break
+      }
+    }
+    if (suggestFrom) {
+      console.debug('suggest me: %s => %o', text, suggestFrom)
+      let result: TypeaheadResult | null = null
+      if (suggestFrom.type === 'mention') {
+        result = await Komposer.TypeaheadAPI.typeaheadUserNames(suggestFrom.value, text)
+      } else if (suggestFrom.type === 'hashtag') {
+        result = await Komposer.TypeaheadAPI.typeaheadHashTags(suggestFrom.value, text)
+      }
+      if (result) {
+        callback(suggestFrom, result)
+      } else {
+        callback(suggestFrom, null)
+      }
+    } else {
+      console.debug('suggest should clear')
+      callback(null, null)
+    }
+  }
+
   function applyMagic(editorRootElem: HTMLElement) {
     if (editorRootElem.classList.contains('komposer-applied')) {
       return
@@ -236,7 +284,50 @@
     const placeholder = getPlaceholderText(editorRootElem)
     const currentValue = editorState.getCurrentContent().getPlainText()
     const textarea = taContainer.appendChild(document.createElement('textarea'))
+    const suggestArea = taContainer.appendChild(document.createElement('div'))
+    const clearSuggest = () => {
+      suggestArea.innerHTML = ''
+    }
+    function createSuggestItem(suggestFrom: SuggestFrom, word_: string): HTMLElement {
+      let word = word_
+      if (suggestFrom.type === 'mention') {
+        word = `@${word}`
+      }
+      const item = document.createElement('button')
+      assign(item, {
+        type: 'button',
+        className: 'komposer-suggest-item',
+        textContent: word,
+      })
+      item.addEventListener('click', event => {
+        event.preventDefault()
+        clearSuggest()
+        const { value } = textarea
+        const [startIndex, endIndex] = suggestFrom.indices
+        const after = value
+          .slice(0, startIndex)
+          .concat(word)
+          .concat(value.slice(endIndex, value.length))
+        updateText(editor, after)
+        textarea.value = after
+        textarea.focus()
+      })
+      return item
+    }
+    const handleSuggest = (suggestFrom: SuggestFrom | null, result: TypeaheadResult | null) => {
+      clearSuggest()
+      if (!(suggestFrom && result)) {
+        return
+      }
+      for (const user of result.users) {
+        suggestArea.appendChild(createSuggestItem(suggestFrom, user.screen_name))
+      }
+      for (const topic of result.topics) {
+        suggestArea.appendChild(createSuggestItem(suggestFrom, topic.topic))
+      }
+    }
     textareaToEditorMap.set(textarea, editor)
+    const debouncedSuggest = _.debounce(suggest, 500)
     assign(textarea, {
       placeholder,
       className: 'komposer',
@@ -300,6 +391,7 @@
       oninput() {
         fitTextareaHeight(textarea)
         updateText(editor, textarea.value)
+        debouncedSuggest(textarea, handleSuggest)
       },
     })
     if (shouldFocusAfterMagic) {

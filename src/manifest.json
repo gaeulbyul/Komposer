@@ -30,5 +30,10 @@
     }
   ],
 
-  "web_accessible_resources": ["scripts/inject.js"]
+  "web_accessible_resources": [
+    "vendor/twitter-text.min.js",
+    "vendor/lodash-custom.min.js",
+    "scripts/api.js",
+    "scripts/inject.js"
+  ]
 }
