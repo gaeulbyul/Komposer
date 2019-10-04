@@ -285,32 +285,61 @@
     const currentValue = editorState.getCurrentContent().getPlainText()
     const textarea = taContainer.appendChild(document.createElement('textarea'))
     const suggestArea = taContainer.appendChild(document.createElement('div'))
+    suggestArea.className = 'komposer-suggest-area'
     const clearSuggest = () => {
       suggestArea.innerHTML = ''
     }
-    function createSuggestItem(suggestFrom: SuggestFrom, word_: string): HTMLElement {
-      let word = word_
-      if (suggestFrom.type === 'mention') {
-        word = `@${word}`
-      }
+    function acceptSuggest(indices: Indices, word: string) {
+      clearSuggest()
+      const { value } = textarea
+      const [startIndex, endIndex] = indices
+      const after = value
+        .slice(0, startIndex)
+        .concat(word)
+        .concat(value.slice(endIndex, value.length))
+      updateText(editor, after)
+      textarea.value = after
+      textarea.focus()
+    }
+    function createUserSuggestItem(suggestFrom: SuggestFrom, user: User): HTMLElement {
+      const userName = '@' + user.screen_name
       const item = document.createElement('button')
       assign(item, {
         type: 'button',
         className: 'komposer-suggest-item',
-        textContent: word,
+      })
+      const profileImage = item.appendChild(document.createElement('img'))
+      assign(profileImage, {
+        src: user.profile_image_url_https,
+        width: 48,
+        height: 48,
+        className: 'image',
+      })
+      const label = item.appendChild(document.createElement('div'))
+      assign(label, {
+        textContent: `${userName} (${user.name})`,
+        className: 'label',
       })
       item.addEventListener('click', event => {
         event.preventDefault()
-        clearSuggest()
-        const { value } = textarea
-        const [startIndex, endIndex] = suggestFrom.indices
-        const after = value
-          .slice(0, startIndex)
-          .concat(word)
-          .concat(value.slice(endIndex, value.length))
-        updateText(editor, after)
-        textarea.value = after
-        textarea.focus()
+        acceptSuggest(suggestFrom.indices, userName)
+      })
+      return item
+    }
+    function createTagSuggestItem(suggestFrom: SuggestFrom, word: string): HTMLElement {
+      const item = document.createElement('button')
+      assign(item, {
+        type: 'button',
+        className: 'komposer-suggest-item',
+      })
+      const label = item.appendChild(document.createElement('div'))
+      assign(label, {
+        textContent: word,
+        className: 'label',
+      })
+      item.addEventListener('click', event => {
+        event.preventDefault()
+        acceptSuggest(suggestFrom.indices, word)
       })
       return item
     }
@@ -320,10 +349,10 @@
         return
       }
       for (const user of result.users) {
-        suggestArea.appendChild(createSuggestItem(suggestFrom, user.screen_name))
+        suggestArea.appendChild(createUserSuggestItem(suggestFrom, user))
       }
       for (const topic of result.topics) {
-        suggestArea.appendChild(createSuggestItem(suggestFrom, topic.topic))
+        suggestArea.appendChild(createTagSuggestItem(suggestFrom, topic.topic))
       }
     }
     textareaToEditorMap.set(textarea, editor)
@@ -468,6 +497,27 @@
     applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
     observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
     integrateEmojiPicker()
+    const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (colorThemeTag) {
+      toggleNightMode(colorThemeTag)
+      new MutationObserver(mutations => {
+        if (mutations.length <= 0) {
+          return
+        }
+        const target = mutations[0].target as HTMLMetaElement
+        toggleNightMode(target)
+      }).observe(colorThemeTag, {
+        attributeFilter: ['content'],
+        attributes: true,
+      })
+    }
+  }
+
+  function toggleNightMode(themeElem: HTMLMetaElement) {
+    const themeColor = themeElem.content.toUpperCase()
+    const nightMode = themeColor !== '#FFFFFF'
+    document.body.classList.toggle('komposer-bright', !nightMode)
+    document.body.classList.toggle('komposer-dark', nightMode)
   }
 
   function initialize() {

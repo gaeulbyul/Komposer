@@ -5,16 +5,20 @@ declare namespace twttr {
 
 type EventHandler = (event: Event) => void
 
+type Indices = [number, number]
+
+// TODO: rename mention=>user ?
+
 interface SuggestFromMention {
   type: 'mention'
   value: string
-  indices: [number, number]
+  indices: Indices
 }
 
 interface SuggestFromHashtag {
   type: 'hashtag'
   value: string
-  indices: [number, number]
+  indices: Indices
 }
 
 type SuggestFrom = SuggestFromMention | SuggestFromHashtag

@@ -23,12 +23,32 @@ textarea.komposer:disabled {
   opacity: 0.5;
 }
 
-.komposer-suggest-item {
-  display: block;
-  padding: 15px;
+.komposer-suggest-area {
   background-color: inherit;
+  box-shadow: 0 2px 5px #000;
+}
+
+.komposer-suggest-item {
+  display: flex;
+  padding: 10px 20px;
+  width: 100%;
+  align-items: center;
+  text-align: left;
+  border: 0;
+  background-color: inherit;
+  cursor: pointer;
+}
+
+.komposer-suggest-item .image {
+  margin: 0 10px;
+  border-radius: 50%;
+  background-color: lightgray;
+}
+
+.komposer-suggest-item .label {
+  flex-grow: 1;
   color: inherit;
-  border: 1px solid grey;
+  font-size: large;
 }
 
 /* 작은 화면 (모바일) */
