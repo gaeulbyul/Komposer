@@ -1,12 +1,226 @@
-const EVENT_SENDING = 'Komposer::SENDING'
-const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
-const textareaToEditorMap = new WeakMap<HTMLTextAreaElement, any>()
-
 const enum HowToHandleEnterKey {
   SendTweet,
   SendDM,
   LineBreak,
   AcceptSuggest,
+}
+
+class Komposer {
+  private readonly editorRootElem: HTMLElement
+  private readonly editorContentElem: HTMLElement
+  private readonly draftjsEditor: any
+  private readonly draftjsEditorState: any
+  private readonly isDM: boolean
+  private readonly textareaContainer = document.createElement('div')
+  public readonly textarea = document.createElement('textarea')
+  private readonly suggestArea = document.createElement('div')
+  private get value(): string {
+    return this.draftjsEditorState.getCurrentContent().getPlainText()
+  }
+  private set value(text: string) {
+    const { draftjsEditorState, draftjsEditor } = this
+    const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
+    const edits = draftjsEditorState.constructor.createWithContent(conts)
+    draftjsEditor.update(edits)
+  }
+  constructor(editorRootElem: HTMLElement) {
+    this.editorRootElem = editorRootElem
+    this.editorContentElem = editorRootElem.querySelector<HTMLElement>(
+      '.DraftEditor-editorContainer > div[contenteditable=true]'
+    )!
+    const { editor, editorState } = dig(
+      () => getReactEventHandler(this.editorContentElem).children[0].props
+    )
+    this.isDM = this.editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput'
+    this.draftjsEditor = editor
+    this.draftjsEditorState = editorState
+    this.initializeTextarea()
+    this.initializeEvents()
+  }
+  public static isApplied(elem: HTMLElement) {
+    return elem.classList.contains('komposer-applied')
+  }
+  public applyKomposer() {
+    const { editorRootElem } = this
+    if (Komposer.isApplied(editorRootElem)) {
+      return
+    }
+    editorRootElem.classList.add('komposer-applied')
+    const parentOfEditorRoot = editorRootElem.parentElement!
+    parentOfEditorRoot.hidden = true
+    const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
+    grandParentOfEditorRoot.prepend(this.textareaContainer)
+    if (editorRootElem.contains(document.activeElement)) {
+      this.textarea.focus()
+    }
+  }
+  // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
+  public insertAtCursor(textToInsert: string) {
+    const { textarea } = this
+    const { value, selectionStart, selectionEnd } = textarea
+    textarea.value = value.slice(0, selectionStart) + textToInsert + value.slice(selectionEnd)
+    textarea.selectionStart = textarea.selectionEnd = selectionStart + textToInsert.length
+    this.value = textarea.value
+    this.fitTextareaHeight()
+  }
+  private initializeTextarea() {
+    const { textarea } = this
+    textarea.className = 'komposer'
+    textarea.title = '(Komposer 확장기능으로 대체한 입력칸입니다.)'
+    textarea.placeholder = this.getPlaceholderText()
+    textarea.value = this.value
+    this.textareaContainer.appendChild(textarea)
+    this.textareaContainer.appendChild(this.suggestArea)
+  }
+  private initializeEvents() {
+    const { textarea } = this
+    textarea.addEventListener('keypress', event => {
+      // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
+      event.stopPropagation()
+      const { code } = event
+      // ArrowUp ArrorDown Escape
+      if (code === 'Enter') {
+        const how = this.handleEnterKey(event)
+        if (how !== HowToHandleEnterKey.LineBreak) {
+          event.preventDefault()
+        }
+        switch (how) {
+          case HowToHandleEnterKey.SendDM:
+            this.sendDM()
+            break
+          case HowToHandleEnterKey.SendTweet:
+            this.sendTweet()
+            break
+        }
+      }
+    })
+    textarea.addEventListener('input', () => {
+      this.fitTextareaHeight()
+      this.value = this.textarea.value
+    })
+    textarea.addEventListener('paste', event => {
+      const { clipboardData } = event
+      if (!clipboardData) {
+        return
+      }
+      const textData = clipboardData.getData('text')
+      if (textData) {
+        return
+      }
+      const onPaste = dig(
+        () => getReactEventHandler(this.editorContentElem.parentElement!).children.props.onPaste
+      )
+      if (typeof onPaste === 'function') {
+        onPaste(event)
+      }
+    })
+    textarea.addEventListener('dragover', event => {
+      // 요게 없으면 드롭이 안되더라.
+      event.stopPropagation()
+      // 요건 파이어폭스에선 필요함
+      event.preventDefault()
+    })
+    textarea.addEventListener('drop', event => {
+      event.stopPropagation()
+      const dropTarget = this.getDropTarget()
+      const onDrop = dig(() => getReactEventHandler(dropTarget!).onDrop)
+      const items = event.dataTransfer!.items
+      const isMedia = items[0] && !items[0].type.startsWith('text/')
+      console.log(items[0].type)
+      if (isMedia) {
+        onDrop(event)
+      } else {
+        // 여기서 onDrop은 텍스트 삽입을 해주진 않고,
+        // 드래그/드롭시 입력칸 주위에 나타나는 점선 테두리를 없애는 역할을 해준다.
+        // 단, setTimeout 없이 곧바로 호출하면 텍스트 삽입이 되지 않는다.
+        window.setTimeout(() => {
+          onDrop(event)
+        })
+      }
+    })
+    // DM 전송 후 입력칸을 비워준다.
+    if (this.isDM) {
+      const sendDMButton = document.querySelector<HTMLElement>(
+        '[data-testid="dmComposerSendButton"]'
+      )!
+      sendDMButton.addEventListener('click', () => {
+        textarea.value = ''
+        // 그냥 focus 하면 글자입력을 할 수 없다.
+        // 이 시점에서 이미 activeElement 는 textarea 라서
+        // .focus() 메서드를 호출해도 별다른 동작을 하지 않는것으로 추정(?)
+        setTimeout(() => {
+          if (textarea.isSameNode(document.activeElement)) {
+            textarea.blur()
+            textarea.focus()
+          }
+        }, 50)
+      })
+    }
+  }
+  private getPlaceholderText(): string {
+    const { editorRootElem } = this
+    let placeholder = '무슨 일이 일어나고 있나요?'
+    const placeholderElem = editorRootElem.querySelector('.public-DraftEditorPlaceholder-root')
+    if (placeholderElem) {
+      const { textContent } = placeholderElem
+      if (textContent) {
+        placeholder = textContent
+      }
+    }
+    return placeholder
+  }
+  private getDropTarget() {
+    return closestWith(this.editorRootElem.parentElement!, elem => {
+      const onDrop = dig(() => getReactEventHandler(elem).onDrop)
+      return typeof onDrop === 'function'
+    })
+  }
+  private fitTextareaHeight() {
+    const { textarea } = this
+    textarea.style.height = '2px'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }
+  private handleEnterKey(event: KeyboardEvent): HowToHandleEnterKey {
+    const { isDM } = this
+    if (event.code !== 'Enter') {
+      throw new Error('I can only handle Enter key')
+    }
+    const { ctrlKey, shiftKey } = event
+    if (isDM) {
+      if (shiftKey) {
+        return HowToHandleEnterKey.LineBreak
+      } else {
+        return HowToHandleEnterKey.SendDM
+      }
+    } else {
+      if (ctrlKey) {
+        return HowToHandleEnterKey.SendTweet
+      } else {
+        return HowToHandleEnterKey.LineBreak
+      }
+    }
+  }
+  private sendTweet() {
+    const grandParentOfEditorRoot = this.editorRootElem.parentElement!.parentElement!
+    const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
+    if (!grandProps) {
+      throw new Error('fail to get grandProps')
+    }
+    const { sendTweetCommandName, keyCommandHandlers } = grandProps
+    const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
+    return sendTweetFn()
+  }
+
+  private sendDM() {
+    const sendDMButton = document.querySelector<HTMLElement>(
+      '[data-testid="dmComposerSendButton"]'
+    )!
+    const disabled = sendDMButton.getAttribute('aria-disabled') === 'true'
+    if (disabled) {
+      return
+    }
+    sendDMButton.click()
+  }
 }
 
 function dig<T>(obj: () => T): T | null {
@@ -72,474 +286,123 @@ function closestWith(
   return null
 }
 
-function findActiveTextarea(): HTMLTextAreaElement | null {
-  let komposers = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-  if (komposers.length === 0) {
-    return null
-  } else if (komposers.length === 1) {
-    return komposers[0]
-  }
-  const toolBar = document.querySelector<HTMLElement>('[data-testid=toolBar]')
-  if (!toolBar) {
-    return null
-  }
-  const closest = closestWith(toolBar, elem => {
-    komposers = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-    return komposers.length === 1
-  })
-  if (closest) {
-    return komposers[0]
-  } else {
-    return null
-  }
-}
+{
+  const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
 
-function updateText(editor: any, text: string) {
-  const { editorState } = editor.props
-  const conts = editorState.getCurrentContent().constructor.createFromText(text)
-  const edits = editorState.constructor.createWithContent(conts)
-  editor.update(edits)
-}
+  function applyMagic(elem: HTMLElement) {
+    const kom = new Komposer(elem)
+    kom.applyKomposer()
+    textareaToKomposerMap.set(kom.textarea, kom)
+  }
 
-function getPlaceholderText(editorRootElem: HTMLElement): string {
-  let placeholder = '무슨 일이 일어나고 있나요?'
-  const placeholderElem = editorRootElem.querySelector('.public-DraftEditorPlaceholder-root')
-  if (placeholderElem) {
-    const { textContent } = placeholderElem
-    if (textContent) {
-      placeholder = textContent
+  function main() {
+    function applyMagicEach(elems: NodeListOf<HTMLElement>) {
+      elems.forEach(applyMagic)
     }
-  }
-  return placeholder
-}
-
-function sendTweet(grandParentOfEditorRoot: HTMLElement) {
-  const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
-  if (!grandProps) {
-    throw new Error('fail to get grandProps')
-  }
-  const { sendTweetCommandName, keyCommandHandlers } = grandProps
-  const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
-  return sendTweetFn()
-}
-
-function sendDM(sendDMButton: HTMLElement) {
-  const disabled = sendDMButton.getAttribute('aria-disabled') === 'true'
-  if (disabled) {
-    return
-  }
-  sendDMButton.click()
-}
-
-function integrateEmojiPicker() {
-  document.addEventListener('click', event => {
-    const { target } = event
-    if (!(target instanceof HTMLElement)) {
-      return
-    }
-    const isTargetEmoji = target.matches('#emoji_picker_categories_dom_id div[style*="twemoji"]')
-    if (!isTargetEmoji) {
-      return
-    }
-    event.stopPropagation()
-    const compo = target.parentElement!.parentElement!
-    const { emoji } = dig(() => getReactEventHandler(compo).children.props)
-    const activeTextarea = findActiveTextarea()
-    if (!activeTextarea) {
-      return
-    }
-    const activeEditor = textareaToEditorMap.get(activeTextarea)!
-    insertAtCursor(activeTextarea, emoji.unified)
-    updateText(activeEditor, activeTextarea.value)
-    fitTextareaHeight(activeTextarea)
-  })
-}
-
-const progressbarObserver = new MutationObserver(mutations => {
-  const { target } = mutations[0]
-  if (!(target instanceof HTMLElement)) {
-    return
-  }
-  const valuenow = target.getAttribute('aria-valuenow')
-  const realValue = parseInt(valuenow || '0', 10) || 0
-  const disabled = realValue > 0
-  document.dispatchEvent(
-    new CustomEvent(EVENT_SENDING, {
-      detail: {
-        disabled,
-      },
-    })
-  )
-})
-
-function observeProgressBar(elem: HTMLElement) {
-  if (!elem.matches('[role=progressbar]')) {
-    throw new Error('unexpected: non progressbar')
-  }
-  progressbarObserver.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['aria-valuenow'],
-  })
-}
-
-function handleEnterKey(event: KeyboardEvent, isDMInput: boolean): HowToHandleEnterKey {
-  if (event.code !== 'Enter') {
-    throw new Error('I can only handle Enter key')
-  }
-  const { ctrlKey, shiftKey } = event
-  if (isDMInput) {
-    if (shiftKey) {
-      return HowToHandleEnterKey.LineBreak
-    } else {
-      return HowToHandleEnterKey.SendDM
-    }
-  } else {
-    if (ctrlKey) {
-      return HowToHandleEnterKey.SendTweet
-    } else {
-      return HowToHandleEnterKey.LineBreak
-    }
-  }
-}
-
-function fitTextareaHeight(textarea: HTMLTextAreaElement) {
-  textarea.style.height = '2px'
-  textarea.style.height = `${textarea.scrollHeight}px`
-}
-
-async function suggest(
-  textarea: HTMLTextAreaElement,
-  callback: (suggestFrom: SuggestFrom | null, result: TypeaheadResult | null) => void
-) {
-  const { value: text, selectionEnd } = textarea
-  const mentions = twttr.txt.extractMentionsWithIndices(text)
-  const hashtags = twttr.txt.extractHashtagsWithIndices(text)
-  let suggestFrom: SuggestFrom | null = null
-  let suggestType: 'mention' | 'hashtag' | null = null
-  for (const mention of mentions) {
-    const { indices, screenName } = mention
-    if (selectionEnd === indices[1]) {
-      suggestType = 'mention'
-      suggestFrom = {
-        indices,
-        value: screenName,
-      }
-      break
-    }
-  }
-  for (const tag of hashtags) {
-    const { indices, hashtag } = tag
-    if (selectionEnd === indices[1]) {
-      suggestType = 'hashtag'
-      suggestFrom = {
-        indices,
-        value: hashtag,
-      }
-      break
-    }
-  }
-  if (suggestFrom && suggestType) {
-    console.debug('suggest me: %s => %o', text, suggestFrom)
-    let result: TypeaheadResult | null = null
-    if (suggestType === 'mention') {
-      result = await Komposer.TypeaheadAPI.typeaheadUserNames(suggestFrom.value, text)
-    } else if (suggestType === 'hashtag') {
-      result = await Komposer.TypeaheadAPI.typeaheadHashTags(suggestFrom.value, text)
-    }
-    if (result) {
-      callback(suggestFrom, result)
-    } else {
-      callback(suggestFrom, null)
-    }
-  } else {
-    console.debug('suggest should clear')
-    callback(null, null)
-  }
-}
-
-function applyMagic(editorRootElem: HTMLElement) {
-  if (editorRootElem.classList.contains('komposer-applied')) {
-    return
-  }
-  editorRootElem.classList.add('komposer-applied')
-  const editorContentElem = editorRootElem.querySelector<HTMLElement>(
-    '.DraftEditor-editorContainer > div[contenteditable=true]'
-  )!
-  const { editor, editorState } = dig(
-    () => getReactEventHandler(editorContentElem).children[0].props
-  )
-  const editorContainerElem = editorContentElem.parentElement!
-  const parentOfEditorRoot = editorRootElem.parentElement!
-  const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
-  const sendDMButton = document.querySelector<HTMLElement>('[data-testid="dmComposerSendButton"]')
-  const isDMInput = sendDMButton != null
-  const activeElement = document.activeElement
-  const shouldFocusAfterMagic = editorRootElem.contains(activeElement)
-  parentOfEditorRoot.hidden = true
-  const taContainer = document.createElement('div')
-  grandParentOfEditorRoot.prepend(taContainer)
-  const dropTarget = closestWith(parentOfEditorRoot, elem => {
-    const onDrop = dig(() => getReactEventHandler(elem).onDrop)
-    return typeof onDrop === 'function'
-  })
-  const placeholder = getPlaceholderText(editorRootElem)
-  const currentValue = editorState.getCurrentContent().getPlainText()
-  const textarea = taContainer.appendChild(document.createElement('textarea'))
-  const suggestArea = taContainer.appendChild(document.createElement('div'))
-  suggestArea.className = 'komposer-suggest-area'
-  const clearSuggest = () => {
-    suggestArea.innerHTML = ''
-  }
-  function acceptSuggest(indices: Indices, word: string) {
-    clearSuggest()
-    const { value } = textarea
-    const [startIndex, endIndex] = indices
-    const after = value
-      .slice(0, startIndex)
-      .concat(word)
-      .concat(value.slice(endIndex, value.length))
-    updateText(editor, after)
-    textarea.value = after
-    textarea.focus()
-  }
-  function createUserSuggestItem(suggestFrom: SuggestFrom, user: User): HTMLElement {
-    const userName = '@' + user.screen_name
-    const item = document.createElement('button')
-    assign(item, {
-      type: 'button',
-      className: 'komposer-suggest-item',
-    })
-    const profileImage = item.appendChild(document.createElement('img'))
-    assign(profileImage, {
-      src: user.profile_image_url_https,
-      width: 48,
-      height: 48,
-      className: 'image',
-    })
-    const label = item.appendChild(document.createElement('div'))
-    assign(label, {
-      // textContent: `${userName} (${user.name})`,
-      className: 'double-label',
-    })
-    const nickNameLabel = label.appendChild(document.createElement('div'))
-    assign(nickNameLabel, {
-      textContent: user.name,
-    })
-    const userNameLabel = label.appendChild(document.createElement('div'))
-    assign(userNameLabel, {
-      textContent: userName,
-      className: 'secondary',
-    })
-    item.addEventListener('click', event => {
-      event.preventDefault()
-      acceptSuggest(suggestFrom.indices, userName)
-    })
-    return item
-  }
-  function createTagSuggestItem(suggestFrom: SuggestFrom, word: string): HTMLElement {
-    const item = document.createElement('button')
-    assign(item, {
-      type: 'button',
-      className: 'komposer-suggest-item',
-    })
-    const label = item.appendChild(document.createElement('div'))
-    assign(label, {
-      textContent: word,
-      className: 'label',
-    })
-    item.addEventListener('click', event => {
-      event.preventDefault()
-      acceptSuggest(suggestFrom.indices, word)
-    })
-    return item
-  }
-  function handleSuggest(suggestFrom: SuggestFrom | null, result: TypeaheadResult | null) {
-    clearSuggest()
-    if (!(suggestFrom && result)) {
-      return
-    }
-    for (const user of result.users) {
-      suggestArea.appendChild(createUserSuggestItem(suggestFrom, user))
-    }
-    for (const topic of result.topics) {
-      suggestArea.appendChild(createTagSuggestItem(suggestFrom, topic.topic))
-    }
-  }
-  textareaToEditorMap.set(textarea, editor)
-  const debouncedSuggest = _.debounce(suggest, 500)
-  assign(textarea, {
-    placeholder,
-    className: 'komposer',
-    value: currentValue,
-    title: '(Komposer 확장기능으로 대체한 입력칸입니다.)',
-    onkeypress(event: KeyboardEvent) {
-      // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
-      event.stopPropagation()
-      const { code } = event
-      // ArrowUp ArrorDown Escape
-      if (code === 'Enter') {
-        const how = handleEnterKey(event, isDMInput)
-        if (how !== HowToHandleEnterKey.LineBreak) {
-          event.preventDefault()
-        }
-        switch (how) {
-          case HowToHandleEnterKey.SendDM:
-            sendDM(sendDMButton!)
-            break
-          case HowToHandleEnterKey.SendTweet:
-            sendTweet(grandParentOfEditorRoot)
-            break
-        }
-      }
-    },
-    ondragover(event: DragEvent) {
-      // 요게 없으면 드롭이 안되더라.
-      event.stopPropagation()
-      // 요건 파이어폭스에선 필요함
-      event.preventDefault()
-    },
-    ondrop(event: DragEvent) {
-      event.stopPropagation()
-      const onDrop = dig(() => getReactEventHandler(dropTarget!).onDrop)
-      const items = event.dataTransfer!.items
-      const isMedia = items[0] && !items[0].type.startsWith('text/')
-      if (isMedia) {
-        onDrop(event)
-      } else {
-        // 여기서 onDrop은 텍스트 삽입을 해주진 않고,
-        // 드래그/드롭시 입력칸 주위에 나타나는 점선 테두리를 없애는 역할을 해준다.
-        // 단, setTimeout 없이 곧바로 호출하면 텍스트 삽입이 되지 않는다.
-        window.setTimeout(() => {
-          onDrop(event)
-        })
-      }
-    },
-    onpaste(event: ClipboardEvent) {
-      const { clipboardData } = event
-      if (!clipboardData) {
-        return
-      }
-      const textData = clipboardData.getData('text')
-      if (textData) {
-        return
-      }
-      const onPaste = dig(() => getReactEventHandler(editorContainerElem).children.props.onPaste)
-      if (typeof onPaste === 'function') {
-        onPaste(event)
-      }
-    },
-    oninput() {
-      fitTextareaHeight(textarea)
-      updateText(editor, textarea.value)
-      debouncedSuggest(textarea, handleSuggest)
-    },
-  })
-  if (shouldFocusAfterMagic) {
-    textarea.focus()
-  }
-  fitTextareaHeight(textarea)
-  if (sendDMButton) {
-    sendDMButton.addEventListener('click', _event => {
-      textarea.value = ''
-      // 그냥 focus 하면 글자입력을 할 수 없다.
-      // 이 시점에서 이미 activeElement 는 textarea 라서
-      // .focus() 메서드를 호출해도 별다른 동작을 하지 않는것으로 추정(?)
-      setTimeout(() => {
-        if (textarea.isSameNode(document.activeElement)) {
-          textarea.blur()
-          textarea.focus()
-        }
-      }, 50)
-    })
-  }
-  const sendingEventHandler = (event: Event) => {
-    if (!(event instanceof CustomEvent)) {
-      return
-    }
-    const { disabled } = event.detail
-    textarea.disabled = disabled
-  }
-  document.addEventListener(EVENT_SENDING, sendingEventHandler)
-  sendingEventMap.set(textarea, sendingEventHandler)
-}
-
-// https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
-function insertAtCursor(input: HTMLTextAreaElement, textToInsert: string) {
-  const { value, selectionStart, selectionEnd } = input
-
-  // update the value with our text inserted
-  input.value = value.slice(0, selectionStart) + textToInsert + value.slice(selectionEnd)
-
-  // update cursor to be at the end of insertion
-  input.selectionStart = input.selectionEnd = selectionStart + textToInsert.length
-}
-
-function main() {
-  function applyMagicEach(elems: NodeListOf<HTMLElement>) {
-    elems.forEach(applyMagic)
-  }
-  function observerProgressBarEach(elems: NodeListOf<HTMLElement>) {
-    elems.forEach(observeProgressBar)
-  }
-  new MutationObserver(mutations => {
-    for (const elem of getAddedElementsFromMutations(mutations)) {
-      const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
-      applyMagicEach(editorRootElems)
-      const progressbars = elem.querySelectorAll<HTMLElement>('[role=progressbar]')
-      observerProgressBarEach(progressbars)
-    }
-    for (const elem of getRemovedElementsFromMutations(mutations)) {
-      // textarea가 사라지면 event를 정리한다
-      const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-      for (const textarea of textareas) {
-        textareaToEditorMap.delete(textarea)
-        const sendingEventHandler = sendingEventMap.get(textarea)
-        if (sendingEventHandler) {
-          document.removeEventListener(EVENT_SENDING, sendingEventHandler)
-          sendingEventMap.delete(textarea)
-        }
-      }
-    }
-  }).observe(document.body, {
-    subtree: true,
-    characterData: true,
-    childList: true,
-  })
-  applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
-  observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
-  integrateEmojiPicker()
-  const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-  if (colorThemeTag) {
-    toggleNightMode(colorThemeTag)
     new MutationObserver(mutations => {
-      if (mutations.length <= 0) {
+      for (const elem of getAddedElementsFromMutations(mutations)) {
+        const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
+        applyMagicEach(editorRootElems)
+      }
+      for (const elem of getRemovedElementsFromMutations(mutations)) {
+        // textarea가 사라지면 event를 정리한다
+        const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+        for (const textarea of textareas) {
+          textareaToKomposerMap.delete(textarea)
+          /*
+          const sendingEventHandler = sendingEventMap.get(textarea)
+          if (sendingEventHandler) {
+            document.removeEventListener(EVENT_SENDING, sendingEventHandler)
+            sendingEventMap.delete(textarea)
+          }
+          */
+        }
+      }
+    }).observe(document.body, {
+      subtree: true,
+      characterData: true,
+      childList: true,
+    })
+    applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
+    // observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
+    integrateEmojiPicker()
+    const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (colorThemeTag) {
+      toggleNightMode(colorThemeTag)
+      new MutationObserver(mutations => {
+        if (mutations.length <= 0) {
+          return
+        }
+        const target = mutations[0].target as HTMLMetaElement
+        toggleNightMode(target)
+      }).observe(colorThemeTag, {
+        attributeFilter: ['content'],
+        attributes: true,
+      })
+    }
+  }
+
+  function findActiveTextarea(): HTMLTextAreaElement | null {
+    let komposers = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+    if (komposers.length === 0) {
+      return null
+    } else if (komposers.length === 1) {
+      return komposers[0]
+    }
+    const toolBar = document.querySelector<HTMLElement>('[data-testid=toolBar]')
+    if (!toolBar) {
+      return null
+    }
+    const closest = closestWith(toolBar, elem => {
+      komposers = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+      return komposers.length === 1
+    })
+    if (closest) {
+      return komposers[0]
+    } else {
+      return null
+    }
+  }
+
+  function integrateEmojiPicker() {
+    document.addEventListener('click', event => {
+      const { target } = event
+      if (!(target instanceof HTMLElement)) {
         return
       }
-      const target = mutations[0].target as HTMLMetaElement
-      toggleNightMode(target)
-    }).observe(colorThemeTag, {
-      attributeFilter: ['content'],
-      attributes: true,
+      const isTargetEmoji = target.matches('#emoji_picker_categories_dom_id div[style*="twemoji"]')
+      if (!isTargetEmoji) {
+        return
+      }
+      event.stopPropagation()
+      const compo = target.parentElement!.parentElement!
+      const { emoji } = dig(() => getReactEventHandler(compo).children.props)
+      const activeTextarea = findActiveTextarea()
+      if (!activeTextarea) {
+        return
+      }
+      const komposer = textareaToKomposerMap.get(activeTextarea)!
+      komposer.insertAtCursor(emoji.unified)
     })
   }
-}
 
-function toggleNightMode(themeElem: HTMLMetaElement) {
-  const themeColor = themeElem.content.toUpperCase()
-  const nightMode = themeColor !== '#FFFFFF'
-  document.body.classList.toggle('komposer-bright', !nightMode)
-  document.body.classList.toggle('komposer-dark', nightMode)
-}
-
-function initialize() {
-  const reactRoot = document.getElementById('react-root')!
-  if ('_reactRootContainer' in reactRoot) {
-    console.debug('[Komposer] inject!!!')
-    main()
-  } else {
-    console.debug('[Komposer] waiting...')
-    setTimeout(initialize, 500)
+  function toggleNightMode(themeElem: HTMLMetaElement) {
+    const themeColor = themeElem.content.toUpperCase()
+    const nightMode = themeColor !== '#FFFFFF'
+    document.body.classList.toggle('komposer-bright', !nightMode)
+    document.body.classList.toggle('komposer-dark', nightMode)
   }
-}
 
-initialize()
+  function initialize() {
+    const reactRoot = document.getElementById('react-root')!
+    if ('_reactRootContainer' in reactRoot) {
+      console.debug('[Komposer] inject!!!')
+      main()
+    } else {
+      console.debug('[Komposer] waiting...')
+      setTimeout(initialize, 500)
+    }
+  }
+
+  initialize()
+}

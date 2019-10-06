@@ -2,7 +2,7 @@
   "name": "komposer",
   "private": true,
   "version": "0.0.0-see-manifest-json",
-  "description": "트위터 신 UI에서 트윗입력칸을 구현합니다.",
+  "description": "트위터 신 UI의 트윗입력칸을 대체... 대체... 왜 유저가 대체해야해!!!!!",
   "main": "src/manifest.json",
   "repository": "https://github.com/gaeulbyul/Komposer",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
@@ -29,7 +29,7 @@
     "husky": "^3.0.1",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1",
-    "typescript": "^3.5.3",
+    "typescript": "^3.6.3",
     "web-ext-types": "^3.1.0"
   }
 }
