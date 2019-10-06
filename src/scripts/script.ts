@@ -9,7 +9,7 @@ async function injectScript(src: string) {
   })
 }
 
-async function initialize() {
+async function loadScripts() {
   const scripts = browser.runtime.getManifest().web_accessible_resources!
   for (const path of scripts) {
     const src = browser.runtime.getURL(path)
@@ -17,5 +17,5 @@ async function initialize() {
   }
 }
 if (document.getElementById('react-root')) {
-  initialize()
+  loadScripts()
 }

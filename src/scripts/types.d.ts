@@ -9,19 +9,10 @@ type Indices = [number, number]
 
 // TODO: rename mention=>user ?
 
-interface SuggestFromMention {
-  type: 'mention'
+interface SuggestFrom {
   value: string
   indices: Indices
 }
-
-interface SuggestFromHashtag {
-  type: 'hashtag'
-  value: string
-  indices: Indices
-}
-
-type SuggestFrom = SuggestFromMention | SuggestFromHashtag
 
 interface Topic {
   topic: string

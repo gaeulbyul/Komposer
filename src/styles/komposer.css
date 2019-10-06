@@ -3,6 +3,12 @@
   --placeholder-color-focused: #bdc1c9;
 }
 
+.komposer-suggest-area {
+  --suggest-hover-color: rgb(245, 248, 250);
+  --suggest-hover-color-dark: rgb(25, 39, 52);
+  --suggest-hover-color-black: rgb(21, 24, 28);
+}
+
 textarea.komposer {
   box-sizing: border-box;
   display: block;
@@ -30,7 +36,7 @@ textarea.komposer:disabled {
 
 .komposer-suggest-item {
   display: flex;
-  padding: 10px 20px;
+  padding: 10px;
   width: 100%;
   align-items: center;
   text-align: left;
@@ -47,8 +53,35 @@ textarea.komposer:disabled {
 
 .komposer-suggest-item .label {
   flex-grow: 1;
-  color: inherit;
   font-size: large;
+}
+
+.komposer-suggest-item .double-label {
+  display: flex;
+  flex-direction: column;
+  font-size: large;
+}
+
+.double-label .secondary {
+  opacity: 0.5;
+}
+
+.komposer-bright .komposer-suggest-item:hover {
+  background-color: var(--suggest-hover-color);
+}
+
+.komposer-bright .label,
+.komposer-bright .double-label {
+  color: black;
+}
+
+.komposer-dark .komposer-suggest-item:hover {
+  background-color: var(--suggest-hover-color-dark);
+}
+
+.komposer-dark .label,
+.komposer-dark .double-label {
+  color: white;
 }
 
 /* 작은 화면 (모바일) */
