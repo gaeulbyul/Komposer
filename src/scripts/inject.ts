@@ -287,78 +287,27 @@ function closestWith(
 }
 
 {
+  const EVENT_SENDING = 'Komposer::SENDING'
+  const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
   const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
 
-  function applyMagic(elem: HTMLElement) {
-    const kom = new Komposer(elem)
-    kom.applyKomposer()
-    textareaToKomposerMap.set(kom.textarea, kom)
-  }
-
-  function main() {
-    function applyMagicEach(elems: NodeListOf<HTMLElement>) {
-      elems.forEach(applyMagic)
-    }
-    new MutationObserver(mutations => {
-      for (const elem of getAddedElementsFromMutations(mutations)) {
-        const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
-        applyMagicEach(editorRootElems)
-      }
-      for (const elem of getRemovedElementsFromMutations(mutations)) {
-        // textarea가 사라지면 event를 정리한다
-        const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-        for (const textarea of textareas) {
-          textareaToKomposerMap.delete(textarea)
-          /*
-          const sendingEventHandler = sendingEventMap.get(textarea)
-          if (sendingEventHandler) {
-            document.removeEventListener(EVENT_SENDING, sendingEventHandler)
-            sendingEventMap.delete(textarea)
-          }
-          */
-        }
-      }
-    }).observe(document.body, {
-      subtree: true,
-      characterData: true,
-      childList: true,
-    })
-    applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
-    // observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
-    integrateEmojiPicker()
-    const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-    if (colorThemeTag) {
-      toggleNightMode(colorThemeTag)
-      new MutationObserver(mutations => {
-        if (mutations.length <= 0) {
-          return
-        }
-        const target = mutations[0].target as HTMLMetaElement
-        toggleNightMode(target)
-      }).observe(colorThemeTag, {
-        attributeFilter: ['content'],
-        attributes: true,
-      })
-    }
-  }
-
   function findActiveTextarea(): HTMLTextAreaElement | null {
-    let komposers = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-    if (komposers.length === 0) {
+    let textareas = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+    if (textareas.length === 0) {
       return null
-    } else if (komposers.length === 1) {
-      return komposers[0]
+    } else if (textareas.length === 1) {
+      return textareas[0]
     }
     const toolBar = document.querySelector<HTMLElement>('[data-testid=toolBar]')
     if (!toolBar) {
       return null
     }
     const closest = closestWith(toolBar, elem => {
-      komposers = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
-      return komposers.length === 1
+      textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+      return textareas.length === 1
     })
     if (closest) {
-      return komposers[0]
+      return textareas[0]
     } else {
       return null
     }
@@ -391,6 +340,87 @@ function closestWith(
     const nightMode = themeColor !== '#FFFFFF'
     document.body.classList.toggle('komposer-bright', !nightMode)
     document.body.classList.toggle('komposer-dark', nightMode)
+  }
+
+  const progressbarObserver = new MutationObserver(mutations => {
+    const { target } = mutations[0]
+    if (!(target instanceof HTMLElement)) {
+      return
+    }
+    const valuenow = target.getAttribute('aria-valuenow')
+    const realValue = parseInt(valuenow || '0', 10) || 0
+    const disabled = realValue > 0
+    document.dispatchEvent(
+      new CustomEvent(EVENT_SENDING, {
+        detail: {
+          disabled,
+        },
+      })
+    )
+  })
+
+  function applyMagic(elem: HTMLElement) {
+    const kom = new Komposer(elem)
+    kom.applyKomposer()
+    textareaToKomposerMap.set(kom.textarea, kom)
+  }
+
+  function observeProgressBar(elem: HTMLElement) {
+    if (!elem.matches('[role=progressbar]')) {
+      throw new Error('unexpected: non progressbar')
+    }
+    progressbarObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['aria-valuenow'],
+    })
+  }
+
+  function main() {
+    function applyMagicEach(elems: NodeListOf<HTMLElement>) {
+      elems.forEach(applyMagic)
+    }
+    function observerProgressBarEach(elems: NodeListOf<HTMLElement>) {
+      elems.forEach(observeProgressBar)
+    }
+    new MutationObserver(mutations => {
+      for (const elem of getAddedElementsFromMutations(mutations)) {
+        const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
+        applyMagicEach(editorRootElems)
+      }
+      for (const elem of getRemovedElementsFromMutations(mutations)) {
+        // textarea가 사라지면 event를 정리한다
+        const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
+        for (const textarea of textareas) {
+          textareaToKomposerMap.delete(textarea)
+          const sendingEventHandler = sendingEventMap.get(textarea)
+          if (sendingEventHandler) {
+            document.removeEventListener(EVENT_SENDING, sendingEventHandler)
+            sendingEventMap.delete(textarea)
+          }
+        }
+      }
+    }).observe(document.body, {
+      subtree: true,
+      characterData: true,
+      childList: true,
+    })
+    applyMagicEach(document.querySelectorAll<HTMLElement>('.DraftEditor-root'))
+    observerProgressBarEach(document.querySelectorAll<HTMLElement>('[role=progressbar]'))
+    integrateEmojiPicker()
+    const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (colorThemeTag) {
+      toggleNightMode(colorThemeTag)
+      new MutationObserver(mutations => {
+        if (mutations.length <= 0) {
+          return
+        }
+        const target = mutations[0].target as HTMLMetaElement
+        toggleNightMode(target)
+      }).observe(colorThemeTag, {
+        attributeFilter: ['content'],
+        attributes: true,
+      })
+    }
   }
 
   function initialize() {
