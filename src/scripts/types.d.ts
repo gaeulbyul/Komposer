@@ -20,7 +20,6 @@ interface Topic {
   tokens: Array<{
     token: string
   }>
-  [key: string]: any
 }
 
 interface User {

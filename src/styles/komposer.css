@@ -56,6 +56,12 @@ textarea.komposer:disabled {
   font-size: large;
 }
 
+.komposer-suggest-item.selected .label,
+.komposer-suggest-item.selected .double-label {
+  outline: 1px solid magenta;
+  font-weight: bold;
+}
+
 .komposer-suggest-item .double-label {
   display: flex;
   flex-direction: column;

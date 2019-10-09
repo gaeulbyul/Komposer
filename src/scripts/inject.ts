@@ -88,7 +88,6 @@ class Komposer {
       // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
       event.stopPropagation()
       const { code } = event
-      // ArrowUp ArrorDown Escape
       if (code === 'Enter') {
         const how = this.handleEnterKey(event)
         if (how !== HowToHandleEnterKey.LineBreak) {
@@ -217,7 +216,6 @@ class Komposer {
     const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
     return sendTweetFn()
   }
-
   private sendDM() {
     const sendDMButton = document.querySelector<HTMLElement>(
       '[data-testid="dmComposerSendButton"]'
@@ -232,11 +230,14 @@ class Komposer {
 
 class KomposerSuggester {
   private readonly suggestArea = document.createElement('div')
-  private readonly userItems: User[] = []
-  private readonly hashtagItems: string[] = []
+  private readonly items: Array<User | Topic> = []
   private indices: Indices = [0, 0]
+  private cursor = 0
   constructor(private komposer: Komposer) {
     this.suggestArea.className = 'komposer-suggest-area'
+  }
+  private hasSuggestItems() {
+    return this.items.length > 0
   }
   public connect() {
     const debouncedSuggest = _.debounce(this.suggest.bind(this), 200)
@@ -257,12 +258,57 @@ class KomposerSuggester {
       const { value, selectionEnd } = textarea
       debouncedSuggest(value, selectionEnd)
     })
+    textarea.addEventListener('keyup', event => {
+      const { code } = event
+      const hasItems = this.hasSuggestItems()
+      if (!hasItems) {
+        return
+      }
+      const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape']
+      if (codesToPreventDefault.includes(code)) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+      }
+      switch (code) {
+        case 'ArrowUp':
+          this.moveCursor(-1)
+          break
+        case 'ArrowDown':
+          this.moveCursor(1)
+          break
+        case 'Escape':
+          this.clear()
+          break
+      }
+      this.renderCursor(this.cursor)
+    })
     this.komposer.textareaContainer.appendChild(this.suggestArea)
   }
+  private moveCursor(cur: number) {
+    if (!this.hasSuggestItems()) {
+      return
+    }
+    const length = this.items.length
+    const maxCursor = length - 1
+    const { cursor } = this
+    let newCursor = cursor + cur
+    if (newCursor < 0) {
+      newCursor = 0
+    } else if (newCursor > maxCursor) {
+      newCursor = maxCursor
+    }
+    this.cursor = newCursor
+  }
+  private renderCursor(cursor: number) {
+    const items = this.suggestArea.querySelectorAll('.komposer-suggest-item')
+    items.forEach((item, index) => {
+      item.classList.toggle('selected', index === cursor)
+    })
+  }
   private clear() {
-    this.userItems.length = 0
-    this.hashtagItems.length = 0
+    this.items.length = 0
     this.indices = [0, 0]
+    this.cursor = 0
     this.render()
   }
   private suggest(text: string, cursor: number) {
@@ -289,14 +335,14 @@ class KomposerSuggester {
   private async suggestMention(userName: string, text: string) {
     const result = await TypeaheadAPI.typeaheadUserNames(userName, text)
     for (const user of result.users) {
-      this.userItems.push(user)
+      this.items.push(user)
     }
     this.render()
   }
   private async suggestHashtag(word: string, text: string) {
     const result = await TypeaheadAPI.typeaheadHashTags(word, text)
     for (const topic of result.topics) {
-      this.hashtagItems.push(topic.topic)
+      this.items.push(topic)
     }
     this.render()
   }
@@ -334,7 +380,7 @@ class KomposerSuggester {
     })
     return item
   }
-  private createHashtagItem(word: string): HTMLElement {
+  private createHashtagItem(topic: Topic): HTMLElement {
     const item = document.createElement('button')
     assign(item, {
       type: 'button',
@@ -342,12 +388,12 @@ class KomposerSuggester {
     })
     const label = item.appendChild(document.createElement('div'))
     assign(label, {
-      textContent: word,
+      textContent: topic.topic,
       className: 'label',
     })
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(this.indices, word)
+      this.acceptSuggest(this.indices, topic.topic)
     })
     return item
   }
@@ -361,14 +407,16 @@ class KomposerSuggester {
   }
   private render() {
     this.suggestArea.innerHTML = ''
-    for (const user of this.userItems) {
-      const item = this.createUserItem(user)
-      this.suggestArea.appendChild(item)
+    for (const item of this.items) {
+      let itemElem: HTMLElement
+      if ('id_str' in item) {
+        itemElem = this.createUserItem(item)
+      } else {
+        itemElem = this.createHashtagItem(item)
+      }
+      this.suggestArea.appendChild(itemElem)
     }
-    for (const hashtag of this.hashtagItems) {
-      const item = this.createHashtagItem(hashtag)
-      this.suggestArea.appendChild(item)
-    }
+    this.renderCursor(0)
   }
 }
 

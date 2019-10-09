@@ -1,3 +1,4 @@
+// vim:set ft=javascript:
 {
   "include": ["src/**/*"],
   "exclude": ["src/vendor/*", "*/**/flycheck_*"],
@@ -15,11 +16,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": [
-      "node_modules/@types",
-      "node_modules/csstype",
-      "node_modules/web-ext-types"
-    ],
+    "typeRoots": ["node_modules/@types", "node_modules/csstype", "node_modules/web-ext-types"],
     "inlineSourceMap": false,
     "inlineSources": false
   }
