@@ -1,3 +1,5 @@
+const EVENT_SENDING = 'Komposer::SENDING'
+const EVENT_ACCEPT_SUGGEST = 'Komposer::ACCEPT_SUGGEST'
 const enum HowToHandleEnterKey {
   SendTweet,
   SendDM,
@@ -21,6 +23,12 @@ class Komposer {
     const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
     const edits = draftjsEditorState.constructor.createWithContent(conts)
     draftjsEditor.update(edits)
+  }
+  public get disabled(): boolean {
+    return this.textarea.disabled
+  }
+  public set disabled(value: boolean) {
+    this.textarea.disabled = value
   }
   constructor(editorRootElem: HTMLElement) {
     this.editorRootElem = editorRootElem
@@ -233,7 +241,7 @@ class KomposerSuggester {
   public connect() {
     const debouncedSuggest = _.debounce(this.suggest.bind(this), 200)
     const { textarea } = this.komposer
-    textarea.addEventListener('Komposer::ACCEPT_SUGGEST', event => {
+    textarea.addEventListener(EVENT_ACCEPT_SUGGEST, event => {
       const { indices, word } = (event as CustomEvent<AcceptedSuggest>).detail
       this.clear()
       const { value } = textarea
@@ -348,7 +356,7 @@ class KomposerSuggester {
       indices,
       word,
     }
-    const customEvent = new CustomEvent<AcceptedSuggest>('Komposer::ACCEPT_SUGGEST', { detail })
+    const customEvent = new CustomEvent<AcceptedSuggest>(EVENT_ACCEPT_SUGGEST, { detail })
     this.komposer.textarea.dispatchEvent(customEvent)
   }
   private render() {
@@ -428,7 +436,6 @@ function closestWith(
 }
 
 {
-  const EVENT_SENDING = 'Komposer::SENDING'
   const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
   const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
 
@@ -506,6 +513,15 @@ function closestWith(
     kom.applyKomposer()
     komsug.connect()
     textareaToKomposerMap.set(kom.textarea, kom)
+    const sendingEventHandler = (event: Event) => {
+      if (!(event instanceof CustomEvent)) {
+        return
+      }
+      const { disabled } = event.detail
+      kom.disabled = disabled
+    }
+    document.addEventListener(EVENT_SENDING, sendingEventHandler)
+    sendingEventMap.set(kom.textarea, sendingEventHandler)
   }
 
   function observeProgressBar(elem: HTMLElement) {
