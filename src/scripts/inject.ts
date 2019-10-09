@@ -15,15 +15,6 @@ class Komposer {
   private readonly isDM: boolean
   public readonly textareaContainer = document.createElement('div')
   public readonly textarea = document.createElement('textarea')
-  private get value(): string {
-    return this.draftjsEditorState.getCurrentContent().getPlainText()
-  }
-  private set value(text: string) {
-    const { draftjsEditorState, draftjsEditor } = this
-    const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
-    const edits = draftjsEditorState.constructor.createWithContent(conts)
-    draftjsEditor.update(edits)
-  }
   public get disabled(): boolean {
     return this.textarea.disabled
   }
@@ -62,7 +53,7 @@ class Komposer {
     }
   }
   public updateText(text: string) {
-    this.value = text
+    this.updateDraftEditorText(text)
     this.textarea.value = text
   }
   // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
@@ -71,15 +62,24 @@ class Komposer {
     const { value, selectionStart, selectionEnd } = textarea
     textarea.value = value.slice(0, selectionStart) + textToInsert + value.slice(selectionEnd)
     textarea.selectionStart = textarea.selectionEnd = selectionStart + textToInsert.length
-    this.value = textarea.value
+    this.updateDraftEditorText(textarea.value)
     this.fitTextareaHeight()
+  }
+  private getDraftEditorText(): string {
+    return this.draftjsEditorState.getCurrentContent().getPlainText()
+  }
+  private updateDraftEditorText(text: string) {
+    const { draftjsEditorState, draftjsEditor } = this
+    const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
+    const edits = draftjsEditorState.constructor.createWithContent(conts)
+    draftjsEditor.update(edits)
   }
   private initializeTextarea() {
     const { textarea } = this
     textarea.className = 'komposer'
     textarea.title = '(Komposer 확장기능으로 대체한 입력칸입니다.)'
     textarea.placeholder = this.getPlaceholderText()
-    textarea.value = this.value
+    textarea.value = this.getDraftEditorText()
     this.textareaContainer.appendChild(textarea)
   }
   private initializeEvents() {
@@ -106,7 +106,7 @@ class Komposer {
     })
     textarea.addEventListener('input', () => {
       this.fitTextareaHeight()
-      this.value = this.textarea.value
+      this.updateDraftEditorText(this.textarea.value)
     })
     textarea.addEventListener('paste', event => {
       const { clipboardData } = event
