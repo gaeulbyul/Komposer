@@ -43,3 +43,8 @@ interface TypeaheadResult {
   topics: Topic[]
   users: User[]
 }
+
+interface AcceptedSuggest {
+  indices: Indices
+  word: string
+}

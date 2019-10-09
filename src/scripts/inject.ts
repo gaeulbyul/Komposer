@@ -11,9 +11,8 @@ class Komposer {
   private readonly draftjsEditor: any
   private readonly draftjsEditorState: any
   private readonly isDM: boolean
-  private readonly textareaContainer = document.createElement('div')
+  public readonly textareaContainer = document.createElement('div')
   public readonly textarea = document.createElement('textarea')
-  private readonly suggestArea = document.createElement('div')
   private get value(): string {
     return this.draftjsEditorState.getCurrentContent().getPlainText()
   }
@@ -54,6 +53,10 @@ class Komposer {
       this.textarea.focus()
     }
   }
+  public updateText(text: string) {
+    this.value = text
+    this.textarea.value = text
+  }
   // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
   public insertAtCursor(textToInsert: string) {
     const { textarea } = this
@@ -70,7 +73,6 @@ class Komposer {
     textarea.placeholder = this.getPlaceholderText()
     textarea.value = this.value
     this.textareaContainer.appendChild(textarea)
-    this.textareaContainer.appendChild(this.suggestArea)
   }
   private initializeEvents() {
     const { textarea } = this
@@ -220,6 +222,148 @@ class Komposer {
   }
 }
 
+class KomposerSuggester {
+  private readonly suggestArea = document.createElement('div')
+  private readonly userItems: User[] = []
+  private readonly hashtagItems: string[] = []
+  private indices: Indices = [0, 0]
+  constructor(private komposer: Komposer) {
+    this.suggestArea.className = 'komposer-suggest-area'
+  }
+  public connect() {
+    const debouncedSuggest = _.debounce(this.suggest.bind(this), 200)
+    const { textarea } = this.komposer
+    textarea.addEventListener('Komposer::ACCEPT_SUGGEST', event => {
+      const { indices, word } = (event as CustomEvent<AcceptedSuggest>).detail
+      this.clear()
+      const { value } = textarea
+      const [startIndex, endIndex] = indices
+      const after = value
+        .slice(0, startIndex)
+        .concat(word)
+        .concat(value.slice(endIndex, value.length))
+      this.komposer.updateText(after)
+      textarea.focus()
+    })
+    textarea.addEventListener('input', () => {
+      const { value, selectionEnd } = textarea
+      debouncedSuggest(value, selectionEnd)
+    })
+    this.komposer.textareaContainer.appendChild(this.suggestArea)
+  }
+  private clear() {
+    this.userItems.length = 0
+    this.hashtagItems.length = 0
+    this.indices = [0, 0]
+    this.render()
+  }
+  private suggest(text: string, cursor: number) {
+    this.clear()
+    const mentions = twttr.txt.extractMentionsWithIndices(text)
+    const hashtags = twttr.txt.extractHashtagsWithIndices(text)
+    for (const mention of mentions) {
+      const { indices, screenName } = mention
+      if (cursor === indices[1]) {
+        this.indices = indices
+        this.suggestMention(screenName, text)
+        return
+      }
+    }
+    for (const tag of hashtags) {
+      const { indices, hashtag } = tag
+      if (cursor === indices[1]) {
+        this.indices = indices
+        this.suggestHashtag(hashtag, text)
+        return
+      }
+    }
+  }
+  private async suggestMention(userName: string, text: string) {
+    const result = await TypeaheadAPI.typeaheadUserNames(userName, text)
+    for (const user of result.users) {
+      this.userItems.push(user)
+    }
+    this.render()
+  }
+  private async suggestHashtag(word: string, text: string) {
+    const result = await TypeaheadAPI.typeaheadHashTags(word, text)
+    for (const topic of result.topics) {
+      this.hashtagItems.push(topic.topic)
+    }
+    this.render()
+  }
+  private createUserItem(user: User): HTMLElement {
+    const userName = '@' + user.screen_name
+    const item = document.createElement('button')
+    assign(item, {
+      type: 'button',
+      className: 'komposer-suggest-item',
+    })
+    const profileImage = item.appendChild(document.createElement('img'))
+    assign(profileImage, {
+      src: user.profile_image_url_https,
+      width: 48,
+      height: 48,
+      className: 'image',
+    })
+    const label = item.appendChild(document.createElement('div'))
+    assign(label, {
+      // textContent: `${userName} (${user.name})`,
+      className: 'double-label',
+    })
+    const nickNameLabel = label.appendChild(document.createElement('div'))
+    assign(nickNameLabel, {
+      textContent: user.name,
+    })
+    const userNameLabel = label.appendChild(document.createElement('div'))
+    assign(userNameLabel, {
+      textContent: userName,
+      className: 'secondary',
+    })
+    item.addEventListener('click', event => {
+      event.preventDefault()
+      this.acceptSuggest(this.indices, userName)
+    })
+    return item
+  }
+  private createHashtagItem(word: string): HTMLElement {
+    const item = document.createElement('button')
+    assign(item, {
+      type: 'button',
+      className: 'komposer-suggest-item',
+    })
+    const label = item.appendChild(document.createElement('div'))
+    assign(label, {
+      textContent: word,
+      className: 'label',
+    })
+    item.addEventListener('click', event => {
+      event.preventDefault()
+      this.acceptSuggest(this.indices, word)
+    })
+    return item
+  }
+  private acceptSuggest(indices: Indices, word: string) {
+    const detail = {
+      indices,
+      word,
+    }
+    const customEvent = new CustomEvent<AcceptedSuggest>('Komposer::ACCEPT_SUGGEST', { detail })
+    this.komposer.textarea.dispatchEvent(customEvent)
+  }
+  private render() {
+    this.suggestArea.innerHTML = ''
+    for (const user of this.userItems) {
+      const item = this.createUserItem(user)
+      this.suggestArea.appendChild(item)
+    }
+    for (const hashtag of this.hashtagItems) {
+      const item = this.createHashtagItem(hashtag)
+      this.suggestArea.appendChild(item)
+    }
+  }
+}
+
 function dig<T>(obj: () => T): T | null {
   try {
     return obj()
@@ -358,7 +502,9 @@ function closestWith(
 
   function applyMagic(elem: HTMLElement) {
     const kom = new Komposer(elem)
+    const komsug = new KomposerSuggester(kom)
     kom.applyKomposer()
+    komsug.connect()
     textareaToKomposerMap.set(kom.textarea, kom)
   }
 
