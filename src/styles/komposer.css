@@ -4,9 +4,15 @@
 }
 
 .komposer-suggest-area {
+  --suggest-background: #ffffff;
+  --suggest-background-dark: #15202b;
+  --suggest-background-black: #000000;
   --suggest-hover-color: rgb(245, 248, 250);
   --suggest-hover-color-dark: rgb(25, 39, 52);
   --suggest-hover-color-black: rgb(21, 24, 28);
+  --suggest-border-color: rgb(230, 236, 240);
+  --suggest-border-color-dark: rgb(56, 68, 77);
+  --suggest-border-color-black: rgb(47, 51, 54);
 }
 
 textarea.komposer {
@@ -29,9 +35,19 @@ textarea.komposer:disabled {
   opacity: 0.5;
 }
 
-.komposer-suggest-area {
-  background-color: inherit;
-  box-shadow: 0 2px 5px #000;
+body[data-komposer-theme='#FFFFFF'] .komposer-suggest-area {
+  background-color: var(--suggest-background);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+body[data-komposer-theme='#15202B'] .komposer-suggest-area {
+  background-color: var(--suggest-background-dark);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+body[data-komposer-theme='#000000'] .komposer-suggest-area {
+  background-color: var(--suggest-background-black);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .komposer-suggest-item {
@@ -43,6 +59,19 @@ textarea.komposer:disabled {
   border: 0;
   background-color: inherit;
   cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+body[data-komposer-theme='#FFFFFF'] .komposer-suggest-item:not(:first-child) {
+  border-top: 1px solid var(--suggest-border-color);
+}
+
+body[data-komposer-theme='#15202B'] .komposer-suggest-item:not(:first-child) {
+  border-top: 1px solid var(--suggest-border-color-dark);
+}
+
+body[data-komposer-theme='#000000'] .komposer-suggest-item:not(:first-child) {
+  border-top: 1px solid var(--suggest-border-color-black);
 }
 
 .komposer-suggest-item .image {
@@ -51,42 +80,60 @@ textarea.komposer:disabled {
   background-color: lightgray;
 }
 
-.komposer-suggest-item .label {
+.komposer-suggest-item .label,
+.komposer-suggest-item .double-label {
   flex-grow: 1;
-  font-size: large;
+  font-size: 18px;
+}
+
+body[data-komposer-theme='#FFFFFF'] .komposer-suggest-item.selected {
+  background-color: var(--suggest-hover-color);
+}
+
+body[data-komposer-theme='#15202B'] .komposer-suggest-item.selected {
+  background-color: var(--suggest-hover-color-dark);
+}
+
+body[data-komposer-theme='#000000'] .komposer-suggest-item.selected {
+  background-color: var(--suggest-hover-color-black);
 }
 
 .komposer-suggest-item.selected .label,
 .komposer-suggest-item.selected .double-label {
-  outline: 1px solid magenta;
   font-weight: bold;
 }
 
 .komposer-suggest-item .double-label {
   display: flex;
   flex-direction: column;
-  font-size: large;
 }
 
 .double-label .secondary {
-  opacity: 0.5;
+  font-size: smaller;
+  opacity: 0.7;
 }
 
-.komposer-bright .komposer-suggest-item:hover {
+body[data-komposer-theme='#FFFFFF'] .komposer-suggest-item:hover {
   background-color: var(--suggest-hover-color);
 }
 
-.komposer-bright .label,
-.komposer-bright .double-label {
-  color: black;
-}
-
-.komposer-dark .komposer-suggest-item:hover {
+body[data-komposer-theme='#15202B'] .komposer-suggest-item:hover {
   background-color: var(--suggest-hover-color-dark);
 }
 
-.komposer-dark .label,
-.komposer-dark .double-label {
+body[data-komposer-theme='#15202B'] .komposer-suggest-item:hover {
+  background-color: var(--suggest-hover-color-black);
+}
+
+body[data-komposer-theme='#FFFFFF'] .label,
+body[data-komposer-theme='#FFFFFF'] .double-label {
+  color: black;
+}
+
+body[data-komposer-theme='#15202B'] .label,
+body[data-komposer-theme='#15202B'] .double-label,
+body[data-komposer-theme='#000000'] .label,
+body[data-komposer-theme='#000000'] .double-label {
   color: white;
 }
 

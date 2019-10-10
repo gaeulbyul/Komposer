@@ -548,9 +548,8 @@ function closestWith(
 
   function toggleNightMode(themeElem: HTMLMetaElement) {
     const themeColor = themeElem.content.toUpperCase()
-    const nightMode = themeColor !== '#FFFFFF'
-    document.body.classList.toggle('komposer-bright', !nightMode)
-    document.body.classList.toggle('komposer-dark', nightMode)
+    // theme-color: one of #FFFFFF #15202B #000000
+    document.body.setAttribute('data-komposer-theme', themeColor)
   }
 
   const progressbarObserver = new MutationObserver(mutations => {
