@@ -4,7 +4,6 @@ const enum HowToHandleEnterKey {
   SendTweet,
   SendDM,
   LineBreak,
-  AcceptSuggest,
 }
 
 class Komposer {
@@ -251,6 +250,7 @@ class KomposerSuggester {
         .slice(0, startIndex)
         .concat(word)
         .concat(value.slice(endIndex, value.length))
+        .concat(' ')
       this.komposer.updateText(after)
       textarea.focus()
     })
@@ -258,13 +258,13 @@ class KomposerSuggester {
       const { value, selectionEnd } = textarea
       debouncedSuggest(value, selectionEnd)
     })
-    textarea.addEventListener('keyup', event => {
+    textarea.addEventListener('keydown', event => {
       const { code } = event
       const hasItems = this.hasSuggestItems()
       if (!hasItems) {
         return
       }
-      const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape']
+      const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape', 'Enter']
       if (codesToPreventDefault.includes(code)) {
         event.preventDefault()
         event.stopImmediatePropagation()
@@ -278,6 +278,9 @@ class KomposerSuggester {
           break
         case 'Escape':
           this.clear()
+          break
+        case 'Enter':
+          this.acceptSuggestOnCursor()
           break
       }
       this.renderCursor(this.cursor)
@@ -376,7 +379,7 @@ class KomposerSuggester {
     })
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(this.indices, userName)
+      this.acceptSuggest(userName)
     })
     return item
   }
@@ -393,17 +396,29 @@ class KomposerSuggester {
     })
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(this.indices, topic.topic)
+      this.acceptSuggest(topic.topic)
     })
     return item
   }
-  private acceptSuggest(indices: Indices, word: string) {
+  private acceptSuggestOnCursor() {
+    let word = ''
+    const currentItem = this.items[this.cursor]
+    if ('id_str' in currentItem) {
+      word = '@' + currentItem.screen_name
+    } else {
+      word = currentItem.topic
+    }
+    this.acceptSuggest(word)
+  }
+  private acceptSuggest(word: string) {
+    const { indices } = this
     const detail = {
       indices,
       word,
     }
     const customEvent = new CustomEvent<AcceptedSuggest>(EVENT_ACCEPT_SUGGEST, { detail })
     this.komposer.textarea.dispatchEvent(customEvent)
+    this.clear()
   }
   private render() {
     this.suggestArea.innerHTML = ''
