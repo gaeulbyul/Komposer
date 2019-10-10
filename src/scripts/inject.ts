@@ -239,7 +239,7 @@ class KomposerSuggester {
     return this.items.length > 0
   }
   public connect() {
-    const debouncedSuggest = _.debounce(this.suggest.bind(this), 200)
+    const debouncedSuggest = _.debounce(this.suggest.bind(this), 500)
     const { textarea } = this.komposer
     textarea.addEventListener(EVENT_ACCEPT_SUGGEST, event => {
       const { indices, word } = (event as CustomEvent<AcceptedSuggest>).detail
@@ -314,38 +314,28 @@ class KomposerSuggester {
     this.cursor = 0
     this.render()
   }
-  private suggest(text: string, cursor: number) {
+  private async suggest(text: string, cursor: number) {
     this.clear()
-    const mentions = twttr.txt.extractMentionsWithIndices(text)
-    const hashtags = twttr.txt.extractHashtagsWithIndices(text)
-    for (const mention of mentions) {
-      const { indices, screenName } = mention
-      if (cursor === indices[1]) {
-        this.indices = indices
-        this.suggestMention(screenName, text)
-        return
+    const entities = twttr.txt.extractEntitiesWithIndices(text)
+    const entity = entities.find(entity => entity.indices[1] === cursor)
+    if (!entity) {
+      return
+    }
+    this.indices = entity.indices
+    let result: TypeaheadResult
+    if ('screenName' in entity) {
+      result = await TypeaheadAPI.typeaheadUserNames(entity.screenName, text)
+    } else if ('hashtag' in entity) {
+      result = await TypeaheadAPI.typeaheadHashTags(entity.hashtag, text)
+    } else {
+      return
+    }
+    let count = 1
+    for (const userOrTopic of [...result.users, ...result.topics]) {
+      this.items.push(userOrTopic)
+      if (++count > 10) {
+        break
       }
-    }
-    for (const tag of hashtags) {
-      const { indices, hashtag } = tag
-      if (cursor === indices[1]) {
-        this.indices = indices
-        this.suggestHashtag(hashtag, text)
-        return
-      }
-    }
-  }
-  private async suggestMention(userName: string, text: string) {
-    const result = await TypeaheadAPI.typeaheadUserNames(userName, text)
-    for (const user of result.users) {
-      this.items.push(user)
-    }
-    this.render()
-  }
-  private async suggestHashtag(word: string, text: string) {
-    const result = await TypeaheadAPI.typeaheadHashTags(word, text)
-    for (const topic of result.topics) {
-      this.items.push(topic)
     }
     this.render()
   }
@@ -354,13 +344,14 @@ class KomposerSuggester {
     const item = document.createElement('button')
     assign(item, {
       type: 'button',
-      className: 'komposer-suggest-item',
+      title: `${user.name}\n${userName}`,
+      className: 'komposer-suggest-item mention',
     })
     const profileImage = item.appendChild(document.createElement('img'))
     assign(profileImage, {
       src: user.profile_image_url_https,
-      width: 48,
-      height: 48,
+      width: 40,
+      height: 40,
       className: 'image',
     })
     const label = item.appendChild(document.createElement('div'))
@@ -371,6 +362,7 @@ class KomposerSuggester {
     const nickNameLabel = label.appendChild(document.createElement('div'))
     assign(nickNameLabel, {
       textContent: user.name,
+      className: 'primary',
     })
     const userNameLabel = label.appendChild(document.createElement('div'))
     assign(userNameLabel, {
@@ -385,18 +377,20 @@ class KomposerSuggester {
   }
   private createHashtagItem(topic: Topic): HTMLElement {
     const item = document.createElement('button')
+    const hashtag = topic.topic
     assign(item, {
       type: 'button',
-      className: 'komposer-suggest-item',
+      title: hashtag,
+      className: 'komposer-suggest-item hashtag',
     })
     const label = item.appendChild(document.createElement('div'))
     assign(label, {
-      textContent: topic.topic,
+      textContent: hashtag,
       className: 'label',
     })
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(topic.topic)
+      this.acceptSuggest(hashtag)
     })
     return item
   }

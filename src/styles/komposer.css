@@ -52,7 +52,6 @@ body[data-komposer-theme='#000000'] .komposer-suggest-area {
 
 .komposer-suggest-item {
   display: flex;
-  padding: 10px;
   width: 100%;
   align-items: center;
   text-align: left;
@@ -60,6 +59,14 @@ body[data-komposer-theme='#000000'] .komposer-suggest-area {
   background-color: inherit;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
+}
+
+.komposer-suggest-item.mention {
+  padding: 10px 15px;
+}
+
+.komposer-suggest-item.hashtag {
+  padding: 15px;
 }
 
 body[data-komposer-theme='#FFFFFF'] .komposer-suggest-item:not(:first-child) {
@@ -75,15 +82,26 @@ body[data-komposer-theme='#000000'] .komposer-suggest-item:not(:first-child) {
 }
 
 .komposer-suggest-item .image {
-  margin: 0 10px;
+  width: 48;
+  height: 48;
+  margin-right: 15px;
   border-radius: 50%;
   background-color: lightgray;
 }
 
 .komposer-suggest-item .label,
+.komposer-suggest-item .primary,
+.komposer-suggest-item .secondary {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.komposer-suggest-item .label,
 .komposer-suggest-item .double-label {
+  overflow: hidden;
   flex-grow: 1;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 body[data-komposer-theme='#FFFFFF'] .komposer-suggest-item.selected {
@@ -109,7 +127,8 @@ body[data-komposer-theme='#000000'] .komposer-suggest-item.selected {
 }
 
 .double-label .secondary {
-  font-size: smaller;
+  margin-top: 2px;
+  font-size: 14px;
   opacity: 0.7;
 }
 
@@ -121,7 +140,7 @@ body[data-komposer-theme='#15202B'] .komposer-suggest-item:hover {
   background-color: var(--suggest-hover-color-dark);
 }
 
-body[data-komposer-theme='#15202B'] .komposer-suggest-item:hover {
+body[data-komposer-theme='#000000'] .komposer-suggest-item:hover {
   background-color: var(--suggest-hover-color-black);
 }
 
