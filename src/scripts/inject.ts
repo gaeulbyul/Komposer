@@ -264,12 +264,15 @@ class KomposerSuggester {
       if (!hasItems) {
         return
       }
-      const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape', 'Enter']
+      const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape', 'Enter', 'Tab']
       if (codesToPreventDefault.includes(code)) {
         event.preventDefault()
         event.stopImmediatePropagation()
       }
       switch (code) {
+        case 'Tab':
+          this.moveCursor(event.shiftKey ? -1 : 1)
+          break
         case 'ArrowUp':
           this.moveCursor(-1)
           break
