@@ -318,21 +318,23 @@ class KomposerSuggester {
     this.render()
   }
   private async suggest(text: string, cursor: number) {
-    this.clear()
     const entities = twttr.txt.extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
     if (!entity) {
+      this.clear()
       return
     }
-    this.indices = entity.indices
     let result: TypeaheadResult
     if ('screenName' in entity) {
       result = await TypeaheadAPI.typeaheadUserNames(entity.screenName, text)
     } else if ('hashtag' in entity) {
       result = await TypeaheadAPI.typeaheadHashTags(entity.hashtag, text)
     } else {
+      this.clear()
       return
     }
+    this.clear()
+    this.indices = entity.indices
     let count = 1
     for (const userOrTopic of [...result.users, ...result.topics]) {
       this.items.push(userOrTopic)
