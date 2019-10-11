@@ -11,7 +11,7 @@ class Komposer {
   private readonly editorContentElem: HTMLElement
   private readonly draftjsEditor: any
   private readonly draftjsEditorState: any
-  private readonly isDM: boolean
+  public readonly isDM: boolean
   public readonly textareaContainer = document.createElement('div')
   public readonly textarea = document.createElement('textarea')
   public get disabled(): boolean {
@@ -567,20 +567,22 @@ function closestWith(
   })
 
   function applyMagic(elem: HTMLElement) {
-    const kom = new Komposer(elem)
-    const komsug = new KomposerSuggester(kom)
-    kom.applyKomposer()
-    komsug.connect()
-    textareaToKomposerMap.set(kom.textarea, kom)
+    const komposer = new Komposer(elem)
+    komposer.applyKomposer()
+    textareaToKomposerMap.set(komposer.textarea, komposer)
+    if (!komposer.isDM) {
+      const suggester = new KomposerSuggester(komposer)
+      suggester.connect()
+    }
     const sendingEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
         return
       }
       const { disabled } = event.detail
-      kom.disabled = disabled
+      komposer.disabled = disabled
     }
     document.addEventListener(EVENT_SENDING, sendingEventHandler)
-    sendingEventMap.set(kom.textarea, sendingEventHandler)
+    sendingEventMap.set(komposer.textarea, sendingEventHandler)
   }
 
   function observeProgressBar(elem: HTMLElement) {
