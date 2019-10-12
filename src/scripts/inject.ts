@@ -11,8 +11,8 @@ class Komposer {
   private readonly editorContentElem: HTMLElement
   private readonly draftjsEditor: any
   private readonly draftjsEditorState: any
+  private readonly textareaContainer = document.createElement('div')
   public readonly isDM: boolean
-  public readonly textareaContainer = document.createElement('div')
   public readonly textarea = document.createElement('textarea')
   public get disabled(): boolean {
     return this.textarea.disabled
@@ -288,7 +288,7 @@ class KomposerSuggester {
       }
       this.renderCursor(this.cursor)
     })
-    this.komposer.textareaContainer.appendChild(this.suggestArea)
+    document.body.appendChild(this.suggestArea)
   }
   private moveCursor(cur: number) {
     if (!this.hasSuggestItems()) {
@@ -431,6 +431,15 @@ class KomposerSuggester {
       this.suggestArea.appendChild(itemElem)
     }
     this.renderCursor(0)
+    this.relocate()
+  }
+  private relocate() {
+    const { textarea } = this.komposer
+    const { x, y, height } = textarea.getBoundingClientRect() as DOMRect
+    assign(this.suggestArea.style, {
+      top: `${y + height}px`,
+      left: `${x}px`,
+    })
   }
 }
 

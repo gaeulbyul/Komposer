@@ -49,6 +49,9 @@ body[data-komposer-theme='#FFFFFF'] .komposer-suggest-area {
 }
 
 .komposer-suggest-area {
+  width: 400px;
+  position: absolute;
+  z-index: 999;
   background-color: var(--suggest-background);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
