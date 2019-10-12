@@ -441,6 +441,10 @@ class KomposerSuggester {
       left: `${x}px`,
     })
   }
+  public destruct() {
+    this.clear()
+    this.suggestArea.remove()
+  }
 }
 
 function dig<T>(obj: () => T): T | null {
@@ -509,6 +513,7 @@ function closestWith(
 {
   const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
   const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
+  const textareaToSuggesterMap = new WeakMap<HTMLTextAreaElement, KomposerSuggester>()
 
   function findActiveTextarea(): HTMLTextAreaElement | null {
     let textareas = document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
@@ -584,6 +589,7 @@ function closestWith(
     if (!komposer.isDM) {
       const suggester = new KomposerSuggester(komposer)
       suggester.connect()
+      textareaToSuggesterMap.set(komposer.textarea, suggester)
     }
     const sendingEventHandler = (event: Event) => {
       if (!(event instanceof CustomEvent)) {
@@ -623,6 +629,11 @@ function closestWith(
         const textareas = elem.querySelectorAll<HTMLTextAreaElement>('textarea.komposer')
         for (const textarea of textareas) {
           textareaToKomposerMap.delete(textarea)
+          const suggester = textareaToSuggesterMap.get(textarea)
+          if (suggester) {
+            suggester.destruct()
+            textareaToSuggesterMap.delete(textarea)
+          }
           const sendingEventHandler = sendingEventMap.get(textarea)
           if (sendingEventHandler) {
             document.removeEventListener(EVENT_SENDING, sendingEventHandler)
