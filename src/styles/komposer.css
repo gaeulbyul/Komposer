@@ -48,6 +48,13 @@ body[data-komposer-theme='#FFFFFF'] .komposer-suggest-area {
   box-shadow: 0 0 10px rgba(50, 50, 50, 0.5);
 }
 
+/* 화면크기 변경 등 일부 조건에서 트위터 Typeahead가 나타나는 경우가 있다. */
+/* 그래서 이를 숨기도록 함. */
+div[id^='typeaheadDropdownWrapped'] {
+  visibility: hidden !important;
+  display: none !important;
+}
+
 .komposer-suggest-area {
   width: 400px;
   position: absolute;
