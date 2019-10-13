@@ -565,9 +565,39 @@ function closestWith(
     })
   }
 
+  // https://stackoverflow.com/a/11868159
+  // http://www.w3.org/TR/AERT#color-contrast
+  // hexColor는 #RRGGBB 의 문자열
+  function getBrightness(hexColor: string): number {
+    if (!/^#[0-9a-f]{6}$/i.test(hexColor)) {
+      throw new Error('invalid color format')
+    }
+    const [red, green, blue] = hexColor.match(/[0-9a-f]{2}/gi)!.map(hex => parseInt(hex, 16))
+    const brightness = red * 299 + green * 587 + blue * 114
+    return Math.round(brightness / 1000)
+  }
+
+  // DarkReader등의 확장기능 대응을 위해 기존 트위터에 없는 색상이 나타나면
+  // 밝기를 구해 색상테마를 맞춘다.
   function toggleNightMode(themeElem: HTMLMetaElement) {
-    const themeColor = themeElem.content.toUpperCase()
-    // theme-color: one of #FFFFFF #15202B #000000
+    let themeColor = themeElem.content.toUpperCase()
+    const bodyStyleRaw = document.body.getAttribute('style') || ''
+    const darkReaderMatch = /--darkreader-inline-bgcolor:(#[0-9A-Fa-f]{6})/.exec(bodyStyleRaw)
+    if (darkReaderMatch) {
+      themeColor = darkReaderMatch[1]
+    }
+    const twitterColors = ['#FFFFFF', '#15202B', '#000000']
+    if (!twitterColors.includes(themeColor)) {
+      const brightness = getBrightness(themeColor)
+      console.info('brightness: %d', brightness)
+      if (brightness > 150) {
+        themeColor = '#FFFFFF'
+      } else if (brightness > 20) {
+        themeColor = '#181A1B'
+      } else {
+        themeColor = '#000000'
+      }
+    }
     document.body.setAttribute('data-komposer-theme', themeColor)
   }
 

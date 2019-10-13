@@ -17,6 +17,13 @@ body[data-komposer-theme='#15202B'] .komposer-suggest-area {
   --suggest-label-color: white;
 }
 
+body[data-komposer-theme='#181A1B'] .komposer-suggest-area {
+  --suggest-background: #181a1b;
+  --suggest-hover-color: #252828;
+  --suggest-border-color: #444550;
+  --suggest-label-color: white;
+}
+
 body[data-komposer-theme='#000000'] .komposer-suggest-area {
   --suggest-background: #000000;
   --suggest-hover-color: #15181c;
