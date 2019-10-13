@@ -152,6 +152,12 @@ div[id^='typeaheadDropdownWrapped'] {
   fill: currentColor;
 }
 
+.hashflag {
+  height: 1em;
+  margin: 0 5px;
+  vertical-align: text-top;
+}
+
 /* 작은 화면 (모바일) */
 main[role='main'] textarea.komposer {
   min-height: 8rem;

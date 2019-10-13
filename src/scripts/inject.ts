@@ -232,8 +232,10 @@ class KomposerSuggester {
   private readonly items: Array<User | Topic> = []
   private indices: Indices = [0, 0]
   private cursor = 0
+  private hashflags: HashFlagsObj = {}
   constructor(private komposer: Komposer) {
     this.suggestArea.className = 'komposer-suggest-area'
+    this.loadHashFlagsStore()
   }
   private hasSuggestItems() {
     return this.items.length > 0
@@ -386,6 +388,20 @@ class KomposerSuggester {
     })
     return item
   }
+  private getHashFlag(hashtag: string): HashFlag | null {
+    const tagWithoutHash = hashtag.replace(/^#/, '').toLowerCase()
+    const flags = this.hashflags[tagWithoutHash]
+    if (flags) {
+      const flag = flags[0]
+      const { startMs, endMs } = flag
+      const now = Date.now()
+      const isOngoing = startMs < now && now < endMs
+      if (isOngoing) {
+        return flag
+      }
+    }
+    return null
+  }
   private createHashtagItem(topic: Topic): HTMLElement {
     const item = document.createElement('button')
     const hashtag = topic.topic
@@ -399,6 +415,14 @@ class KomposerSuggester {
       textContent: hashtag,
       className: 'label',
     })
+    const hashflag = this.getHashFlag(hashtag)
+    if (hashflag) {
+      const flagImg = label.appendChild(document.createElement('img'))
+      assign(flagImg, {
+        src: hashflag.url,
+        className: 'hashflag',
+      })
+    }
     item.addEventListener('click', event => {
       event.preventDefault()
       this.acceptSuggest(hashtag)
@@ -446,6 +470,11 @@ class KomposerSuggester {
       top: `${y + height}px`,
       left: `${x}px`,
     })
+  }
+  private loadHashFlagsStore() {
+    const store = getReactEventHandler(document.querySelector('[data-reactroot]')!).children.props
+      .children.props.store
+    this.hashflags = dig(() => store.getState().hashflags.hashflags) || {}
   }
   public destruct() {
     this.clear()

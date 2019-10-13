@@ -47,3 +47,13 @@ interface AcceptedSuggest {
   indices: Indices
   word: string
 }
+
+interface HashFlag {
+  url: string
+  startMs: number
+  endMs: number
+}
+
+interface HashFlagsObj {
+  [tagName: string]: HashFlag[] | undefined
+}
