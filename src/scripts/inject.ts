@@ -369,6 +369,12 @@ class KomposerSuggester {
       textContent: user.name,
       className: 'primary',
     })
+    if (user.verified) {
+      nickNameLabel.innerHTML += VERIFIED_BADGE
+    }
+    if (user.is_protected) {
+      nickNameLabel.innerHTML += PROTECTED_ICON
+    }
     const userNameLabel = label.appendChild(document.createElement('div'))
     assign(userNameLabel, {
       textContent: userName,

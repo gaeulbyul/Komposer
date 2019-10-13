@@ -131,6 +131,13 @@ body[data-komposer-theme='#FFFFFF'] .komposer-suggest-area {
   color: var(--suggest-label-color);
 }
 
+.badge {
+  height: 1em;
+  margin: 0 2px;
+  vertical-align: text-top;
+  fill: currentColor;
+}
+
 /* 작은 화면 (모바일) */
 main[role='main'] textarea.komposer {
   min-height: 8rem;
