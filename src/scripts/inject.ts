@@ -232,6 +232,7 @@ class KomposerSuggester {
   private readonly items: Array<User | Topic> = []
   private indices: Indices = [0, 0]
   private cursor = 0
+  private currentText = ''
   private hashflags: HashFlagsObj = {}
   constructor(private komposer: Komposer) {
     this.suggestArea.className = 'komposer-suggest-area'
@@ -262,8 +263,7 @@ class KomposerSuggester {
       }, 50)
     })
     textarea.addEventListener('input', () => {
-      const { value, selectionEnd } = textarea
-      debouncedSuggest(value, selectionEnd)
+      debouncedSuggest(textarea)
     })
     textarea.addEventListener('keydown', event => {
       const { code } = event
@@ -322,9 +322,21 @@ class KomposerSuggester {
     this.items.length = 0
     this.indices = [0, 0]
     this.cursor = 0
+    this.currentText = ''
     this.render()
   }
-  private async suggest(text: string, cursor: number) {
+  private async suggest(textarea: HTMLTextAreaElement) {
+    const { value: text, selectionEnd: cursor } = textarea
+    if (!text) {
+      this.clear()
+      return
+    }
+    // 한글 조합(composition)이벤트 등으로 인해 suggest가 여러번 호출되었을 경우
+    // 발생할 수 있는 오작동을 막아줌
+    if (text === this.currentText) {
+      return
+    }
+    this.currentText = text
     const entities = twttr.txt.extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
     if (!entity) {
@@ -341,6 +353,7 @@ class KomposerSuggester {
       return
     }
     this.clear()
+    this.currentText = text
     this.indices = entity.indices
     let count = 1
     for (const userOrTopic of [...result.users, ...result.topics]) {
