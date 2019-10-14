@@ -608,13 +608,21 @@ function closestWith(
       }
       event.stopPropagation()
       const compo = target.parentElement!.parentElement!
-      const { emoji } = dig(() => getReactEventHandler(compo).children.props)
+      // 피부색을 적용할 수 있는 에모지는 activeSkinTone에 값(object)이 들어있고,
+      // 그렇지 않은 에모지는 activeSkinTone이 undefined다.
+      const { activeSkinTone, emoji } = dig(() => getReactEventHandler(compo).children.props)
+      let emojiStr = ''
+      if (activeSkinTone) {
+        emojiStr = emoji.skin_variations[activeSkinTone.codepoint].unified
+      } else {
+        emojiStr = emoji.unified
+      }
       const activeTextarea = findActiveTextarea()
       if (!activeTextarea) {
         return
       }
       const komposer = textareaToKomposerMap.get(activeTextarea)!
-      komposer.insertAtCursor(emoji.unified)
+      komposer.insertAtCursor(emojiStr)
     })
   }
 
