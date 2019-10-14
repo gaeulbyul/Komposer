@@ -243,6 +243,12 @@ class KomposerSuggester {
   }
   public connect() {
     const debouncedSuggest = _.debounce(this.suggest.bind(this), 500)
+    // 화살표키를 한 번 눌렀는데도 커서가 두 번 이동하는 경우가 있더라.
+    // debounce 걸어서 막음
+    const debouncedMoveCursor = _.debounce(this.moveCursor.bind(this), 100, {
+      leading: true,
+      trailing: false,
+    })
     const { textarea } = this.komposer
     textarea.addEventListener(EVENT_ACCEPT_SUGGEST, event => {
       const { indices, word } = (event as CustomEvent<AcceptedSuggest>).detail
@@ -278,13 +284,13 @@ class KomposerSuggester {
       }
       switch (code) {
         case 'Tab':
-          this.moveCursor(event.shiftKey ? -1 : 1)
+          debouncedMoveCursor(event.shiftKey ? -1 : 1)
           break
         case 'ArrowUp':
-          this.moveCursor(-1)
+          debouncedMoveCursor(-1)
           break
         case 'ArrowDown':
-          this.moveCursor(1)
+          debouncedMoveCursor(1)
           break
         case 'Escape':
           this.clear()
