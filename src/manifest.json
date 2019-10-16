@@ -3,7 +3,7 @@
   "name": "Komposer",
   "description": "트위터 신 UI의 트윗입력칸을 대체... 대체... 왜 유저가 대체해야해!!!!!",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage_url": "https://github.com/gaeulbyul/Komposer",
   "icons": {
     "48": "icons/icon-48.png",
