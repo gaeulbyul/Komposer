@@ -41,7 +41,7 @@ textarea.komposer {
   outline: 0;
   resize: none;
   font-size: inherit;
-  font-family: sans-serif;
+  font-family: 'Twemoji', sans-serif;
   background-color: inherit;
   color: inherit;
 }
