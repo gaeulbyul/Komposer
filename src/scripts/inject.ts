@@ -610,9 +610,15 @@ function closestWith(
       const compo = target.parentElement!.parentElement!
       // 피부색을 적용할 수 있는 에모지는 activeSkinTone에 값(object)이 들어있고,
       // 그렇지 않은 에모지는 activeSkinTone이 undefined다.
-      const { activeSkinTone, emoji } = dig(() => getReactEventHandler(compo).children.props)
+      const { activeSkinTone, emoji } = dig<any>(() => {
+        const child = getReactEventHandler(compo).children
+        return {
+          emoji: child.props.emoji,
+          activeSkinTone: child._owner.stateNode.props.activeSkinTone,
+        }
+      })
       let emojiStr = ''
-      if (activeSkinTone) {
+      if (emoji.skin_variations && activeSkinTone && activeSkinTone.codepoint) {
         emojiStr = emoji.skin_variations[activeSkinTone.codepoint].unified
       } else {
         emojiStr = emoji.unified
