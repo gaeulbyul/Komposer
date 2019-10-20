@@ -596,22 +596,37 @@ function closestWith(
     }
   }
 
+  function findEmojiButtonFromTarget(elem: HTMLElement) {
+    const clickedOnEmoji = elem.matches('#emoji_picker_categories_dom_id div[style*=twemoji]')
+    if (clickedOnEmoji) {
+      return elem
+    }
+    const maybeClickedOnMargin = elem.matches('div[aria-selected][role=option]')
+    if (maybeClickedOnMargin) {
+      const maybe = elem.querySelector('div[style*=twemoji]')
+      if (maybe instanceof HTMLElement) {
+        return maybe
+      }
+    }
+    return
+  }
+
   function integrateEmojiPicker() {
     document.addEventListener('click', event => {
       const { target } = event
       if (!(target instanceof HTMLElement)) {
         return
       }
-      const isTargetEmoji = target.matches('#emoji_picker_categories_dom_id div[style*="twemoji"]')
-      if (!isTargetEmoji) {
+      const emojiButton = findEmojiButtonFromTarget(target)
+      if (!emojiButton) {
         return
       }
       event.stopPropagation()
-      const compo = target.parentElement!.parentElement!
+      const emojiDataElem = emojiButton.parentElement!.parentElement!
       // 피부색을 적용할 수 있는 에모지는 activeSkinTone에 값(object)이 들어있고,
       // 그렇지 않은 에모지는 activeSkinTone이 undefined다.
       const { activeSkinTone, emoji } = dig<any>(() => {
-        const child = getReactEventHandler(compo).children
+        const child = getReactEventHandler(emojiDataElem).children
         return {
           emoji: child.props.emoji,
           activeSkinTone: child._owner.stateNode.props.activeSkinTone,
