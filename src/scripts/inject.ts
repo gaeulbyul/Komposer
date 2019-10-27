@@ -258,14 +258,16 @@ class KomposerSuggester {
       const after = value
         .slice(0, startIndex)
         .concat(word)
-        .concat(value.slice(endIndex, value.length))
         .concat(' ')
+        .concat(value.slice(endIndex, value.length))
+      const afterCursor = startIndex + word.length + 1
       // Enter키로 제안을 선택하면 조합중이던 한글이 끝에 입력되는 버그가 있다.
       // 이를 막기위해 잠시 blur를 하여 조합한 글자를 못 붙게 함.
       textarea.blur()
       setTimeout(() => {
         this.komposer.updateText(after)
         textarea.focus()
+        textarea.selectionStart = textarea.selectionEnd = afterCursor
       }, 50)
     })
     textarea.addEventListener('input', () => {
