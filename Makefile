@@ -10,6 +10,7 @@ default:
 	@echo '* make clean: clean extension dir'
 	@echo '* make zip: compress extension into zip file'
 	@echo '* make srczip: compress extension source into zip file (for upload to addons.mozilla.org)'
+	@echo '* make desktop: TODO'
 	@echo 'requirements: node, typescript'
 
 build:

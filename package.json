@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.0.0-see-manifest-json",
   "description": "트위터 신 UI의 트윗입력칸을 대체... 대체... 왜 유저가 대체해야해!!!!!",
-  "main": "src/manifest.json",
+  "main": "desktop/main.ts",
   "repository": "https://github.com/gaeulbyul/Komposer",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "electron -r ts-node/register ."
+  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
@@ -24,11 +27,15 @@
     "@types/lodash": "^4.14.141",
     "@types/twitter-text": "^2.0.0",
     "@typescript-eslint/parser": "^1.6.0",
+    "@types/node": "^12.0.0",
+    "electron": "^7.0.0",
+    "electron-context-menu": "^0.15.0",
     "eslint": "^5.16.0",
     "eslint-plugin-compat": "^3.1.1",
     "husky": "^3.0.1",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1",
+    "ts-node": "^8.2.0",
     "typescript": "^3.6.3",
     "web-ext-types": "^3.1.0"
   }

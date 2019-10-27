@@ -1,4 +1,3 @@
-// vim:set ft=javascript:
 {
   "include": ["src/**/*"],
   "exclude": ["src/vendor/*", "*/**/flycheck_*"],
