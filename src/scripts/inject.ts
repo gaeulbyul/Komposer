@@ -260,11 +260,11 @@ class KomposerSuggester {
         .concat(word)
         .concat(value.slice(endIndex, value.length))
         .concat(' ')
-      this.komposer.updateText(after)
-      // 파이어폭스에서 Enter키로 제안을 선택하면 조합중이던 한글이 끝에 입력되는 버그가 있다.
+      // Enter키로 제안을 선택하면 조합중이던 한글이 끝에 입력되는 버그가 있다.
       // 이를 막기위해 잠시 blur를 하여 조합한 글자를 못 붙게 함.
       textarea.blur()
       setTimeout(() => {
+        this.komposer.updateText(after)
         textarea.focus()
       }, 50)
     })
@@ -273,8 +273,7 @@ class KomposerSuggester {
     })
     textarea.addEventListener('keydown', event => {
       const { code } = event
-      const hasItems = this.hasSuggestItems()
-      if (!hasItems) {
+      if (!this.hasSuggestItems()) {
         return
       }
       const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape', 'Enter', 'Tab']
