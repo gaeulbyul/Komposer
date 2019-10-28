@@ -1,7 +1,9 @@
 NAME := Komposer
 VERSION := $(shell jq .version src/manifest.json)
+EXT_BUILD_DIR := build-ext
+EXT_DIST_DIR := dist-ext
 
-.PHONY: default build clean zip srczip
+.PHONY: default build clean desktop zip srczip
 
 default:
 	@echo "$(NAME) $(VERSION)"
@@ -14,19 +16,20 @@ default:
 	@echo 'requirements: node, typescript'
 
 build:
-	tsc --version
-	mkdir -p build/
-	cp -r src/. build/
+	rsync -av --exclude='*.ts' src/ $(EXT_BUILD_DIR)/
 	tsc
 
 clean:
-	rm -rf build/ dist/
+	rm -rf $(EXT_BUILD_DIR)/ $(EXT_DIST_DIR)/
+
+desktop:
+	yarn run dist
 
 zip:
-	mkdir -p dist/
-	fd --type f .ts build/ --exec rm
-	cd build && zip -9 -X -r ../dist/$(NAME)-v$(VERSION).zip .
+	mkdirp $(EXT_DIST_DIR)
+	fd --type f .ts $(EXT_BUILD_DIR)/ --exec rm
+	cd $(EXT_BUILD_DIR) && zip -9 -X -r --exclude='*.ts' ../$(EXT_DIST_DIR)/$(NAME)-v$(VERSION).zip .
 
 srczip:
-	git archive -9 -v -o ./dist/$(NAME)-v$(VERSION).Source.zip HEAD
+	git archive -9 -v -o ./$(EXT_DIST_DIR)/$(NAME)-v$(VERSION).Source.zip HEAD
 

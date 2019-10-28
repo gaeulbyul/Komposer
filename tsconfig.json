@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "allowJs": true,
     "checkJs": false,
-    "outDir": "build/",
+    "outDir": "build-ext/",
     "rootDir": "src/",
     "strict": true,
     "alwaysStrict": true,
