@@ -2,6 +2,8 @@ NAME := Komposer
 VERSION := $(shell jq .version src/manifest.json)
 EXT_BUILD_DIR := build-ext
 EXT_DIST_DIR := dist-ext
+DESKTOP_BUILD_DIR := build-desktop
+DESKTOP_DIST_DIR := dist-desktop
 
 .PHONY: default build clean desktop zip srczip
 
@@ -21,6 +23,7 @@ build:
 
 clean:
 	rm -rf $(EXT_BUILD_DIR)/ $(EXT_DIST_DIR)/
+	rm -rf $(DESKTOP_BUILD_DIR)/ $(DESKTOP_DIST_DIR)/
 
 desktop:
 	yarn run dist

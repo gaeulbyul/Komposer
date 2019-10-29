@@ -38,9 +38,8 @@
         src="https://mobile.twitter.com"
       ></webview>
     </div>
-    <script type="module">
-      require('ts-node').register()
-      require('./renderer.ts')
+    <script type="module" src="renderer.mjs"></script>
+    <script>
       window.openWebviewDevTools = () => {
         window['twitter-webview'].openDevTools()
       }
