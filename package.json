@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --x64 -wl"
+    "dist": "electron-builder --x64 -w"
   },
   "husky": {
     "hooks": {
