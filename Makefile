@@ -1,9 +1,7 @@
 NAME := Komposer
 VERSION := $(shell jq .version src/manifest.json)
-EXT_BUILD_DIR := build-ext
-EXT_DIST_DIR := dist-ext
 
-.PHONY: default build clean desktop zip srczip
+.PHONY: default build clean zip srczip
 
 default:
 	@echo "$(NAME) $(VERSION)"
@@ -12,24 +10,22 @@ default:
 	@echo '* make clean: clean extension dir'
 	@echo '* make zip: compress extension into zip file'
 	@echo '* make srczip: compress extension source into zip file (for upload to addons.mozilla.org)'
-	@echo '* make desktop: TODO'
 	@echo 'requirements: node, typescript'
 
 build:
-	rsync -av --exclude='*.ts' src/ $(EXT_BUILD_DIR)/
+	tsc --version
+	mkdir -p build/
+	cp -r src/. build/
 	tsc
 
 clean:
-	rm -rf $(EXT_BUILD_DIR)/ $(EXT_DIST_DIR)/
-
-desktop:
-	yarn run dist
+	rm -rf build/ dist/
 
 zip:
-	mkdirp $(EXT_DIST_DIR)
-	fd --type f .ts $(EXT_BUILD_DIR)/ --exec rm
-	cd $(EXT_BUILD_DIR) && zip -9 -X -r --exclude='*.ts' ../$(EXT_DIST_DIR)/$(NAME)-v$(VERSION).zip .
+	mkdir -p dist/
+	fd --type f .ts build/ --exec rm
+	cd build && zip -9 -X -r ../dist/$(NAME)-v$(VERSION).zip .
 
 srczip:
-	git archive -9 -v -o ./$(EXT_DIST_DIR)/$(NAME)-v$(VERSION).Source.zip HEAD
+	git archive -9 -v -o ./dist/$(NAME)-v$(VERSION).Source.zip HEAD
 

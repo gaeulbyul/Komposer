@@ -1,63 +1,21 @@
 {
   "name": "komposer",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.0.0-see-manifest-json",
   "description": "트윗입력 도중 한글이 짤리지 않게 합니다.",
-  "main": "desktop/main.js",
+  "main": "src/manifest.json",
   "repository": "https://github.com/gaeulbyul/Komposer",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
   "license": "MIT",
-  "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --x64 -w"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
   },
-  "build": {
-    "appId": "com.github.gaeulbyul.komposer.desktop",
-    "directories": {
-      "buildResources": "build-desktop",
-      "output": "dist-desktop"
-    },
-    "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    }
-  },
-  "browserslist": [
-    "firefox 63",
-    "chrome 70",
-    "not safari <= 99",
-    "not ie <= 99",
-    "not dead"
-  ],
   "devDependencies": {
     "@types/lodash": "^4.14.141",
-    "@types/node": "^12.0.0",
     "@types/twitter-text": "^2.0.0",
     "@typescript-eslint/parser": "^1.6.0",
-    "electron": "^7.0.0",
-    "electron-builder": "^21.2.0",
-    "electron-context-menu": "^0.15.0",
     "eslint": "^5.16.0",
     "eslint-plugin-compat": "^3.1.1",
     "husky": "^3.0.1",
@@ -65,8 +23,5 @@
     "pretty-quick": "^1.11.1",
     "typescript": "^3.6.3",
     "web-ext-types": "^3.1.0"
-  },
-  "dependencies": {
-    "ts-node": "^8.4.1"
   }
 }
