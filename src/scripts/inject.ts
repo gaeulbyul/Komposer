@@ -224,6 +224,7 @@ class Komposer {
       return
     }
     sendDMButton.click()
+    this.fitTextareaHeight()
   }
 }
 

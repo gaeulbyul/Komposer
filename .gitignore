@@ -4,6 +4,5 @@
 /.vs/
 /.vscode/
 /node_modules/
-/dist*/
-/build*/
-/data/
+/dist/
+/build/
