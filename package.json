@@ -1,7 +1,7 @@
 {
   "name": "komposer",
   "private": true,
-  "version": "0.0.0-see-manifest-json",
+  "version": "0.0.0",
   "description": "트윗입력 도중 한글이 짤리지 않게 합니다.",
   "main": "src/manifest.json",
   "repository": "https://github.com/gaeulbyul/Komposer",
