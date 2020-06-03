@@ -498,8 +498,9 @@ class KomposerSuggester {
     })
   }
   private loadHashFlagsStore() {
-    const store = getReactEventHandler(document.querySelector('[data-reactroot]')!).children.props
-      .children.props.store
+    const reactRoot = document.getElementById('react-root')!.children[0]
+    const rEventHandler = getReactEventHandler(reactRoot)
+    const store = rEventHandler.children.props.children.props.store
     this.hashflags = dig(() => store.getState().hashflags.hashflags) || {}
   }
   public destruct() {
