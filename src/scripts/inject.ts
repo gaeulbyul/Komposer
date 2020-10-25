@@ -706,7 +706,6 @@ function closestWith(
     const twitterColors = ['#FFFFFF', '#15202B', '#000000']
     if (!twitterColors.includes(themeColor)) {
       const brightness = getBrightness(themeColor)
-      console.info('brightness: %d', brightness)
       if (brightness > 150) {
         themeColor = '#FFFFFF'
       } else if (brightness > 20) {
@@ -821,10 +820,8 @@ function closestWith(
   function initialize() {
     const reactRoot = document.getElementById('react-root')!
     if ('_reactRootContainer' in reactRoot) {
-      console.debug('[Komposer] inject!!!')
       main()
     } else {
-      console.debug('[Komposer] waiting...')
       setTimeout(initialize, 500)
     }
   }
