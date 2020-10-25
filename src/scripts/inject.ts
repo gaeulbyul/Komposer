@@ -303,6 +303,9 @@ class KomposerSuggester {
       }
       this.renderCursor(this.cursor)
     })
+    textarea.addEventListener('blur', () => {
+      this.clear()
+    })
     document.body.appendChild(this.suggestArea)
   }
   private moveCursor(cur: number) {
@@ -496,7 +499,9 @@ class KomposerSuggester {
   }
   private render() {
     this.suggestArea.innerHTML = ''
-    if (this.items.length > 0) {
+    const shouldShow =
+      this.komposer.textarea.isSameNode(document.activeElement) && this.hasSuggestItems()
+    if (shouldShow) {
       this.suggestArea.style.display = 'block'
       for (const item of this.items) {
         let itemElem: HTMLElement
