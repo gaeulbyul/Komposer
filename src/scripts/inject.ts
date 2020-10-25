@@ -321,9 +321,28 @@ class KomposerSuggester {
     this.cursor = newCursor
   }
   private renderCursor(cursor: number) {
-    const items = this.suggestArea.querySelectorAll('.komposer-suggest-item')
+    const items = this.suggestArea.querySelectorAll<HTMLElement>('.komposer-suggest-item')
     items.forEach((item, index) => {
-      item.classList.toggle('selected', index === cursor)
+      const selected = index === cursor
+      item.classList.toggle('selected', selected)
+      if (selected) {
+        const overflowedOnTop = this.suggestArea.scrollTop > item.offsetTop
+        if (overflowedOnTop) {
+          this.suggestArea.scrollTo({
+            behavior: 'smooth',
+            top: item.offsetTop,
+          })
+        }
+        const overflowedOnBottom =
+          this.suggestArea.scrollTop + this.suggestArea.clientHeight <
+          item.offsetTop + item.offsetHeight
+        if (overflowedOnBottom) {
+          this.suggestArea.scrollTo({
+            behavior: 'smooth',
+            top: item.offsetTop + item.offsetHeight - this.suggestArea.clientHeight,
+          })
+        }
+      }
     })
   }
   private clear() {
@@ -477,24 +496,32 @@ class KomposerSuggester {
   }
   private render() {
     this.suggestArea.innerHTML = ''
-    for (const item of this.items) {
-      let itemElem: HTMLElement
-      if ('id_str' in item) {
-        itemElem = this.createUserItem(item)
-      } else {
-        itemElem = this.createHashtagItem(item)
+    if (this.items.length > 0) {
+      this.suggestArea.style.display = 'block'
+      for (const item of this.items) {
+        let itemElem: HTMLElement
+        if ('id_str' in item) {
+          itemElem = this.createUserItem(item)
+        } else {
+          itemElem = this.createHashtagItem(item)
+        }
+        this.suggestArea.appendChild(itemElem)
       }
-      this.suggestArea.appendChild(itemElem)
+    } else {
+      this.suggestArea.style.display = 'none'
     }
     this.renderCursor(0)
     this.relocate()
   }
   private relocate() {
     const { textarea } = this.komposer
-    const { x, y, height } = textarea.getBoundingClientRect() as DOMRect
+    const textareaRect = textarea.getBoundingClientRect()
     assign(this.suggestArea.style, {
-      top: `${y + height}px`,
-      left: `${x}px`,
+      top: `${textareaRect.y + textareaRect.height}px`,
+      // 화면폭이 좁으면 왼쪽 여백이 오히려 불편함
+      left: window.innerWidth > 500 ? `${textareaRect.x}px` : '0',
+      maxHeight: `${window.innerHeight - this.suggestArea.offsetTop - 10}px`,
+      right: '0px',
     })
   }
   private loadHashFlagsStore() {
