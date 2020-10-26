@@ -304,7 +304,8 @@ class KomposerSuggester {
       this.renderCursor(this.cursor)
     })
     textarea.addEventListener('blur', () => {
-      this.clear()
+      // 여기서 clear를 즉시 호출하면 마우스클릭으로 제안항목을 선택하는 게 안된다.
+      setTimeout(() => this.clear(), 100)
     })
     document.body.appendChild(this.suggestArea)
   }
