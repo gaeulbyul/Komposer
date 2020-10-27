@@ -76,7 +76,7 @@ class Komposer {
   private initializeTextarea() {
     const { textarea } = this
     textarea.className = 'komposer'
-    textarea.title = '(Komposer 확장기능으로 대체한 입력칸입니다.)'
+    textarea.title = '(Komposer 확장기능을 적용했습니다.)'
     textarea.placeholder = this.getPlaceholderText()
     textarea.value = this.getDraftEditorText()
     this.textareaContainer.appendChild(textarea)
