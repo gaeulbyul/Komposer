@@ -23,7 +23,6 @@
   ],
 
   "web_accessible_resources": [
-    "vendor/twemoji-mozilla.ttf",
     "vendor/twitter-text.min.js",
     "vendor/lodash-custom.min.js",
     "scripts/api.js",
