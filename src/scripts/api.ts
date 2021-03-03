@@ -2,7 +2,7 @@ namespace TypeaheadAPI {
   const BEARER_TOKEN = `AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA`
 
   function getCSRFToken() {
-    const match = /\bct0=([0-9a-f]{32})\b/.exec(document.cookie)
+    const match = /\bct0=([0-9a-f]+)\b/i.exec(document.cookie)
     if (match && match[1]) {
       return match[1]
     } else {
