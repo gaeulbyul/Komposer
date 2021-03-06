@@ -73,13 +73,15 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
   }
 
   class Komposer {
+    /*flow-include
     _editorRootElem: HTMLElement
     _editorContentElem: HTMLElement
     _draftjsEditor: any
     _draftjsEditorState: any
-    _textareaContainer = document.createElement('div')
+    _textareaContainer: HTMLElement
     isDM: boolean
-    textarea = document.createElement('textarea')
+    textarea: HTMLTextAreaElement
+    */
     get disabled(): boolean {
       return this.textarea.disabled
     }
@@ -87,6 +89,8 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       this.textarea.disabled = value
     }
     constructor(editorRootElem: HTMLElement) {
+      this._textareaContainer = document.createElement('div')
+      this.textarea = document.createElement('textarea')
       this._editorRootElem = editorRootElem
       this._editorContentElem = force(
         editorRootElem.querySelector('.DraftEditor-editorContainer > div[contenteditable=true]')
@@ -307,14 +311,22 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
   }
 
   class KomposerSuggester {
-    _suggestArea = document.createElement('div')
-    _items: Array<User | Topic> = []
-    _indices: Indices = [0, 0]
-    _cursor = 0
-    _currentText = ''
-    _hashflags: HashFlagsObj = {}
+    /*flow-include
+    _suggestArea: HTMLElement
+    _items: Array<User | Topic>
+    _indices: Indices
+    _cursor: number
+    _currentText: string
+    _hashflags: HashFlagsObj
     _komposer: Komposer
+    */
     constructor(komposer: Komposer) {
+      this._suggestArea = document.createElement('div')
+      this._items = []
+      this._indices = [0, 0]
+      this._cursor = 0
+      this._currentText = ''
+      this._hashflags = {}
       this._komposer = komposer
       this._suggestArea.className = 'komposer-suggest-area'
       this._loadHashFlagsStore()
