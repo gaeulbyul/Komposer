@@ -1,10 +1,7 @@
 const EVENT_SENDING = 'Komposer::SENDING'
 const EVENT_ACCEPT_SUGGEST = 'Komposer::ACCEPT_SUGGEST'
-const enum HowToHandleEnterKey {
-  SendTweet,
-  SendDM,
-  LineBreak,
-}
+
+type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
 
 class Komposer {
   private readonly editorRootElem: HTMLElement
@@ -89,14 +86,14 @@ class Komposer {
       const { code } = event
       if (code === 'Enter') {
         const how = this.handleEnterKey(event)
-        if (how !== HowToHandleEnterKey.LineBreak) {
+        if (how !== 'LineBreak') {
           event.preventDefault()
         }
         switch (how) {
-          case HowToHandleEnterKey.SendDM:
+          case 'SendDM':
             this.sendDM()
             break
-          case HowToHandleEnterKey.SendTweet:
+          case 'SendTweet':
             this.sendTweet()
             break
         }
@@ -193,15 +190,15 @@ class Komposer {
     const { ctrlKey, shiftKey } = event
     if (isDM) {
       if (shiftKey) {
-        return HowToHandleEnterKey.LineBreak
+        return 'LineBreak'
       } else {
-        return HowToHandleEnterKey.SendDM
+        return 'SendDM'
       }
     } else {
       if (ctrlKey) {
-        return HowToHandleEnterKey.SendTweet
+        return 'SendTweet'
       } else {
-        return HowToHandleEnterKey.LineBreak
+        return 'LineBreak'
       }
     }
   }
