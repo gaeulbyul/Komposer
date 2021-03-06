@@ -8,6 +8,9 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
   const EVENT_SENDING = 'Komposer::SENDING'
   const EVENT_ACCEPT_SUGGEST = 'Komposer::ACCEPT_SUGGEST'
 
+  const userSuggestionsCache = new Map<string, TypeaheadResult>()
+  const hashtagSuggestionsCache = new Map<string, TypeaheadResult>()
+
   function force<T>(value: ?T): T {
     if (value != null) {
       return value
@@ -459,10 +462,22 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       let result: TypeaheadResult
       if ('screenName' in entity) {
         // $FlowIssue
-        result = await TypeaheadAPI.typeaheadUserNames(entity.screenName, text)
+        const screenName = entity.screenName.toLowerCase()
+        if (userSuggestionsCache.has(screenName)) {
+          result = force(userSuggestionsCache.get(screenName))
+        } else {
+          result = await TypeaheadAPI.typeaheadUserNames(screenName, text)
+          userSuggestionsCache.set(screenName, result)
+        }
       } else if ('hashtag' in entity) {
         // $FlowIssue
-        result = await TypeaheadAPI.typeaheadHashTags(entity.hashtag, text)
+        const hashtag = entity.hashtag.toLowerCase()
+        if (hashtagSuggestionsCache.has(hashtag)) {
+          result = force(hashtagSuggestionsCache.get(hashtag))
+        } else {
+          result = await TypeaheadAPI.typeaheadHashTags(hashtag, text)
+          hashtagSuggestionsCache.set(hashtag, result)
+        }
       } else {
         this._clear()
         return
