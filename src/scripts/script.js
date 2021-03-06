@@ -1,4 +1,4 @@
-async function injectScript(src: string) {
+async function injectScript(src) {
   return new Promise((resolve, reject) => {
     const script = Object.assign(document.createElement('script'), {
       onload: resolve,
@@ -10,7 +10,7 @@ async function injectScript(src: string) {
 }
 
 async function loadScripts() {
-  const scripts = browser.runtime.getManifest().web_accessible_resources!
+  const scripts = browser.runtime.getManifest().web_accessible_resources
   for (const path of scripts) {
     if (!path.endsWith('.js')) {
       continue
