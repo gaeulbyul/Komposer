@@ -147,7 +147,7 @@ div[id^='typeaheadDropdownWrapped'] {
   color: var(--suggest-label-color);
 }
 
-.badge {
+.komposer-badge {
   height: 1em;
   margin: 0 2px;
   vertical-align: text-top;
