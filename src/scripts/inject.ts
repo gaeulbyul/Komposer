@@ -367,6 +367,7 @@ class KomposerSuggester {
     if (text === this.currentText) {
       return
     }
+    this.clear()
     this.currentText = text
     const entities = twttr.txt.extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
@@ -374,6 +375,7 @@ class KomposerSuggester {
       this.clear()
       return
     }
+    this.indices = entity.indices
     let result: TypeaheadResult
     if ('screenName' in entity) {
       result = await TypeaheadAPI.typeaheadUserNames(entity.screenName, text)
@@ -383,9 +385,6 @@ class KomposerSuggester {
       this.clear()
       return
     }
-    this.clear()
-    this.currentText = text
-    this.indices = entity.indices
     let count = 1
     for (const userOrTopic of [...result.users, ...result.topics]) {
       this.items.push(userOrTopic)
