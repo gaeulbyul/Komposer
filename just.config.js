@@ -14,7 +14,7 @@ const rmrf = util.promisify(rimraf)
 const exec = util.promisify(proc.exec)
 
 task('build-js', async () => {
-  await exec('flow-remove-types --out-dir build/ src/')
+  await exec('flow-remove-types -p --out-dir build/ src/')
 })
 
 task('build-assets', async () => {
