@@ -4,38 +4,38 @@ const EVENT_ACCEPT_SUGGEST = 'Komposer::ACCEPT_SUGGEST'
 type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
 
 class Komposer {
-  private readonly editorRootElem: HTMLElement
-  private readonly editorContentElem: HTMLElement
-  private readonly draftjsEditor: any
-  private readonly draftjsEditorState: any
-  private readonly textareaContainer = document.createElement('div')
-  public readonly isDM: boolean
-  public readonly textarea = document.createElement('textarea')
-  public get disabled(): boolean {
+  _editorRootElem: HTMLElement
+  _editorContentElem: HTMLElement
+  _draftjsEditor: any
+  _draftjsEditorState: any
+  _textareaContainer = document.createElement('div')
+  isDM: boolean
+  textarea = document.createElement('textarea')
+  get disabled(): boolean {
     return this.textarea.disabled
   }
-  public set disabled(value: boolean) {
+  set disabled(value: boolean) {
     this.textarea.disabled = value
   }
   constructor(editorRootElem: HTMLElement) {
-    this.editorRootElem = editorRootElem
-    this.editorContentElem = editorRootElem.querySelector<HTMLElement>(
+    this._editorRootElem = editorRootElem
+    this._editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]'
     )!
     const { editor, editorState } = dig(
-      () => getReactEventHandler(this.editorContentElem).children[0].props
+      () => getReactEventHandler(this._editorContentElem).children[0].props
     )
-    this.isDM = this.editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput'
-    this.draftjsEditor = editor
-    this.draftjsEditorState = editorState
-    this.initializeTextarea()
-    this.initializeEvents()
+    this.isDM = this._editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput'
+    this._draftjsEditor = editor
+    this._draftjsEditorState = editorState
+    this._initializeTextarea()
+    this._initializeEvents()
   }
-  public static isApplied(elem: HTMLElement) {
+  static isApplied(elem: HTMLElement) {
     return elem.classList.contains('komposer-applied')
   }
-  public applyKomposer() {
-    const { editorRootElem } = this
+  applyKomposer() {
+    const { _editorRootElem: editorRootElem } = this
     if (Komposer.isApplied(editorRootElem)) {
       return
     }
@@ -43,65 +43,65 @@ class Komposer {
     const parentOfEditorRoot = editorRootElem.parentElement!
     parentOfEditorRoot.hidden = true
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
-    grandParentOfEditorRoot.prepend(this.textareaContainer)
+    grandParentOfEditorRoot.prepend(this._textareaContainer)
     if (editorRootElem.contains(document.activeElement)) {
       this.textarea.focus()
     }
   }
-  public updateText(text: string) {
-    this.updateDraftEditorText(text)
+  updateText(text: string) {
+    this._updateDraftEditorText(text)
     this.textarea.value = text
   }
   // https://www.everythingfrontend.com/posts/insert-text-into-textarea-at-cursor-position.html
-  public insertAtCursor(textToInsert: string) {
+  insertAtCursor(textToInsert: string) {
     const { textarea } = this
     const { value, selectionStart, selectionEnd } = textarea
     textarea.value = value.slice(0, selectionStart) + textToInsert + value.slice(selectionEnd)
     textarea.selectionStart = textarea.selectionEnd = selectionStart + textToInsert.length
-    this.updateDraftEditorText(textarea.value)
-    this.fitTextareaHeight()
+    this._updateDraftEditorText(textarea.value)
+    this._fitTextareaHeight()
   }
-  private getDraftEditorText(): string {
-    return this.draftjsEditorState.getCurrentContent().getPlainText()
+  _getDraftEditorText(): string {
+    return this._draftjsEditorState.getCurrentContent().getPlainText()
   }
-  private updateDraftEditorText(text: string) {
-    const { draftjsEditorState, draftjsEditor } = this
+  _updateDraftEditorText(text: string) {
+    const { _draftjsEditorState: draftjsEditorState } = this
     const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
     const edits = draftjsEditorState.constructor.createWithContent(conts)
-    draftjsEditor.update(edits)
+    this._draftjsEditor.update(edits)
   }
-  private initializeTextarea() {
+  _initializeTextarea() {
     const { textarea } = this
     textarea.className = 'komposer'
     textarea.title = '(Komposer 확장기능을 적용했습니다.)'
-    textarea.placeholder = this.getPlaceholderText()
-    textarea.value = this.getDraftEditorText()
-    this.textareaContainer.appendChild(textarea)
+    textarea.placeholder = this._getPlaceholderText()
+    textarea.value = this._getDraftEditorText()
+    this._textareaContainer.appendChild(textarea)
   }
-  private initializeEvents() {
+  _initializeEvents() {
     const { textarea } = this
     textarea.addEventListener('keypress', event => {
       // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
       event.stopPropagation()
       const { code } = event
       if (code === 'Enter') {
-        const how = this.handleEnterKey(event)
+        const how = this._handleEnterKey(event)
         if (how !== 'LineBreak') {
           event.preventDefault()
         }
         switch (how) {
           case 'SendDM':
-            this.sendDM()
+            this._sendDM()
             break
           case 'SendTweet':
-            this.sendTweet()
+            this._sendTweet()
             break
         }
       }
     })
     textarea.addEventListener('input', () => {
-      this.fitTextareaHeight()
-      this.updateDraftEditorText(this.textarea.value)
+      this._fitTextareaHeight()
+      this._updateDraftEditorText(this.textarea.value)
     })
     textarea.addEventListener('paste', event => {
       const { clipboardData } = event
@@ -113,7 +113,7 @@ class Komposer {
         return
       }
       const onPaste = dig(
-        () => getReactEventHandler(this.editorContentElem.parentElement!).children.props.onPaste
+        () => getReactEventHandler(this._editorContentElem.parentElement!).children.props.onPaste
       )
       if (typeof onPaste === 'function') {
         onPaste(event)
@@ -125,7 +125,7 @@ class Komposer {
     })
     textarea.addEventListener('drop', event => {
       event.stopPropagation()
-      const dropTarget = this.getDropTarget()
+      const dropTarget = this._getDropTarget()
       const onDrop = dig(() => getReactEventHandler(dropTarget!).onDrop)
       const items = event.dataTransfer!.items
       const isMedia = items[0] && !items[0].type.startsWith('text/')
@@ -159,10 +159,11 @@ class Komposer {
       })
     }
   }
-  private getPlaceholderText(): string {
-    const { editorRootElem } = this
+  _getPlaceholderText(): string {
     let placeholder = '무슨 일이 일어나고 있나요?'
-    const placeholderElem = editorRootElem.querySelector('.public-DraftEditorPlaceholder-root')
+    const placeholderElem = this._editorRootElem.querySelector(
+      '.public-DraftEditorPlaceholder-root'
+    )
     if (placeholderElem) {
       const { textContent } = placeholderElem
       if (textContent) {
@@ -171,24 +172,23 @@ class Komposer {
     }
     return placeholder
   }
-  private getDropTarget() {
-    return closestWith(this.editorRootElem.parentElement!, elem => {
+  _getDropTarget() {
+    return closestWith(this._editorRootElem.parentElement!, elem => {
       const onDrop = dig(() => getReactEventHandler(elem).onDrop)
       return typeof onDrop === 'function'
     })
   }
-  private fitTextareaHeight() {
+  _fitTextareaHeight() {
     const { textarea } = this
     textarea.style.height = '2px'
     textarea.style.height = `${textarea.scrollHeight}px`
   }
-  private handleEnterKey(event: KeyboardEvent): HowToHandleEnterKey {
-    const { isDM } = this
+  _handleEnterKey(event: KeyboardEvent): HowToHandleEnterKey {
     if (event.code !== 'Enter') {
       throw new Error('I can only handle Enter key')
     }
     const { ctrlKey, shiftKey } = event
-    if (isDM) {
+    if (this.isDM) {
       if (shiftKey) {
         return 'LineBreak'
       } else {
@@ -202,8 +202,8 @@ class Komposer {
       }
     }
   }
-  private sendTweet() {
-    const grandParentOfEditorRoot = this.editorRootElem.parentElement!.parentElement!
+  _sendTweet() {
+    const grandParentOfEditorRoot = this._editorRootElem.parentElement!.parentElement!
     const grandProps = dig(() => getReactEventHandler(grandParentOfEditorRoot).children.props)
     if (!grandProps) {
       throw new Error('fail to get grandProps')
@@ -212,7 +212,7 @@ class Komposer {
     const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
     return sendTweetFn()
   }
-  private sendDM() {
+  _sendDM() {
     const sendDMButton = document.querySelector<HTMLElement>(
       '[data-testid="dmComposerSendButton"]'
     )!
@@ -221,36 +221,38 @@ class Komposer {
       return
     }
     sendDMButton.click()
-    this.fitTextareaHeight()
+    this._fitTextareaHeight()
   }
 }
 
 class KomposerSuggester {
-  private readonly suggestArea = document.createElement('div')
-  private readonly items: Array<User | Topic> = []
-  private indices: Indices = [0, 0]
-  private cursor = 0
-  private currentText = ''
-  private hashflags: HashFlagsObj = {}
-  constructor(private komposer: Komposer) {
-    this.suggestArea.className = 'komposer-suggest-area'
-    this.loadHashFlagsStore()
+  _suggestArea = document.createElement('div')
+  _items: Array<User | Topic> = []
+  _indices: Indices = [0, 0]
+  _cursor = 0
+  _currentText = ''
+  _hashflags: HashFlagsObj = {}
+  _komposer: Komposer
+  constructor(komposer: Komposer) {
+    this._komposer = komposer
+    this._suggestArea.className = 'komposer-suggest-area'
+    this._loadHashFlagsStore()
   }
-  private hasSuggestItems() {
-    return this.items.length > 0
+  _hasSuggestItems() {
+    return this._items.length > 0
   }
-  public connect() {
-    const debouncedSuggest = _.debounce(this.suggest.bind(this), 500)
+  connect() {
+    const debouncedSuggest = _.debounce(this._suggest.bind(this), 500)
     // 화살표키를 한 번 눌렀는데도 커서가 두 번 이동하는 경우가 있더라.
     // debounce 걸어서 막음
-    const debouncedMoveCursor = _.debounce(this.moveCursor.bind(this), 100, {
+    const debouncedMoveCursor = _.debounce(this._moveCursor.bind(this), 100, {
       leading: true,
       trailing: false,
     })
-    const { textarea } = this.komposer
+    const { textarea } = this._komposer
     textarea.addEventListener(EVENT_ACCEPT_SUGGEST, event => {
       const { indices, word } = (event as CustomEvent<AcceptedSuggest>).detail
-      this.clear()
+      this._clear()
       const { value } = textarea
       const [startIndex, endIndex] = indices
       const after = value
@@ -263,7 +265,7 @@ class KomposerSuggester {
       // 이를 막기위해 잠시 blur를 하여 조합한 글자를 못 붙게 함.
       textarea.blur()
       setTimeout(() => {
-        this.komposer.updateText(after)
+        this._komposer.updateText(after)
         textarea.focus()
         textarea.selectionStart = textarea.selectionEnd = afterCursor
       }, 50)
@@ -273,7 +275,7 @@ class KomposerSuggester {
     })
     textarea.addEventListener('keydown', event => {
       const { code } = event
-      if (!this.hasSuggestItems()) {
+      if (!this._hasSuggestItems()) {
         return
       }
       const codesToPreventDefault = ['ArrowUp', 'ArrowDown', 'Escape', 'Enter', 'Tab']
@@ -292,106 +294,105 @@ class KomposerSuggester {
           debouncedMoveCursor(1)
           break
         case 'Escape':
-          this.clear()
+          this._clear()
           break
         case 'Enter':
-          this.acceptSuggestOnCursor()
+          this._acceptSuggestOnCursor()
           break
       }
-      this.renderCursor(this.cursor)
+      this._renderCursor(this._cursor)
     })
     textarea.addEventListener('blur', () => {
       // 여기서 clear를 즉시 호출하면 마우스클릭으로 제안항목을 선택하는 게 안된다.
-      setTimeout(() => this.clear(), 100)
+      setTimeout(() => this._clear(), 100)
     })
-    document.body.appendChild(this.suggestArea)
+    document.body.appendChild(this._suggestArea)
   }
-  private moveCursor(cur: number) {
-    if (!this.hasSuggestItems()) {
+  _moveCursor(cur: number) {
+    if (!this._hasSuggestItems()) {
       return
     }
-    const length = this.items.length
+    const length = this._items.length
     const maxCursor = length - 1
-    const { cursor } = this
-    let newCursor = cursor + cur
+    let newCursor = this._cursor + cur
     if (newCursor < 0) {
       newCursor = 0
     } else if (newCursor > maxCursor) {
       newCursor = maxCursor
     }
-    this.cursor = newCursor
+    this._cursor = newCursor
   }
-  private renderCursor(cursor: number) {
-    const items = this.suggestArea.querySelectorAll<HTMLElement>('.komposer-suggest-item')
+  _renderCursor(cursor: number) {
+    const items = this._suggestArea.querySelectorAll<HTMLElement>('.komposer-suggest-item')
     items.forEach((item, index) => {
       const selected = index === cursor
       item.classList.toggle('selected', selected)
       if (selected) {
-        const overflowedOnTop = this.suggestArea.scrollTop > item.offsetTop
+        const overflowedOnTop = this._suggestArea.scrollTop > item.offsetTop
         if (overflowedOnTop) {
-          this.suggestArea.scrollTo({
+          this._suggestArea.scrollTo({
             behavior: 'smooth',
             top: item.offsetTop,
           })
         }
         const overflowedOnBottom =
-          this.suggestArea.scrollTop + this.suggestArea.clientHeight <
+          this._suggestArea.scrollTop + this._suggestArea.clientHeight <
           item.offsetTop + item.offsetHeight
         if (overflowedOnBottom) {
-          this.suggestArea.scrollTo({
+          this._suggestArea.scrollTo({
             behavior: 'smooth',
-            top: item.offsetTop + item.offsetHeight - this.suggestArea.clientHeight,
+            top: item.offsetTop + item.offsetHeight - this._suggestArea.clientHeight,
           })
         }
       }
     })
   }
-  private clear() {
-    this.items.length = 0
-    this.indices = [0, 0]
-    this.cursor = 0
-    this.currentText = ''
-    this.render()
+  _clear() {
+    this._items.length = 0
+    this._indices = [0, 0]
+    this._cursor = 0
+    this._currentText = ''
+    this._render()
   }
-  private async suggest(textarea: HTMLTextAreaElement) {
+  async _suggest(textarea: HTMLTextAreaElement) {
     const { value: text, selectionEnd: cursor } = textarea
     if (!text) {
-      this.clear()
+      this._clear()
       return
     }
     // 한글 조합(composition)이벤트 등으로 인해 suggest가 여러번 호출되었을 경우
     // 발생할 수 있는 오작동을 막아줌
-    if (text === this.currentText) {
+    if (text === this._currentText) {
       return
     }
-    this.clear()
-    this.currentText = text
+    this._clear()
+    this._currentText = text
     const entities = twttr.txt.extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
     if (!entity) {
-      this.clear()
+      this._clear()
       return
     }
-    this.indices = entity.indices
+    this._indices = entity.indices
     let result: TypeaheadResult
     if ('screenName' in entity) {
       result = await TypeaheadAPI.typeaheadUserNames(entity.screenName, text)
     } else if ('hashtag' in entity) {
       result = await TypeaheadAPI.typeaheadHashTags(entity.hashtag, text)
     } else {
-      this.clear()
+      this._clear()
       return
     }
     let count = 1
     for (const userOrTopic of [...result.users, ...result.topics]) {
-      this.items.push(userOrTopic)
+      this._items.push(userOrTopic)
       if (++count > 10) {
         break
       }
     }
-    this.render()
+    this._render()
   }
-  private createUserItem(user: User): HTMLElement {
+  _createUserItem(user: User): HTMLElement {
     const userName = '@' + user.screen_name
     const item = document.createElement('button')
     assign(item, {
@@ -429,13 +430,13 @@ class KomposerSuggester {
     })
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(userName)
+      this._acceptSuggest(userName)
     })
     return item
   }
-  private getHashFlag(hashtag: string): HashFlag | null {
+  _getHashFlag(hashtag: string): HashFlag | null {
     const tagWithoutHash = hashtag.replace(/^#/, '').toLowerCase()
-    const flags = this.hashflags[tagWithoutHash]
+    const flags = this._hashflags[tagWithoutHash]
     if (flags) {
       const flag = flags[0]
       const { startMs, endMs } = flag
@@ -447,7 +448,7 @@ class KomposerSuggester {
     }
     return null
   }
-  private createHashtagItem(topic: Topic): HTMLElement {
+  _createHashtagItem(topic: Topic): HTMLElement {
     const item = document.createElement('button')
     const hashtag = topic.topic
     assign(item, {
@@ -460,7 +461,7 @@ class KomposerSuggester {
       textContent: hashtag,
       className: 'label',
     })
-    const hashflag = this.getHashFlag(hashtag)
+    const hashflag = this._getHashFlag(hashtag)
     if (hashflag) {
       const flagImg = label.appendChild(document.createElement('img'))
       assign(flagImg, {
@@ -470,71 +471,70 @@ class KomposerSuggester {
     }
     item.addEventListener('click', event => {
       event.preventDefault()
-      this.acceptSuggest(hashtag)
+      this._acceptSuggest(hashtag)
     })
     return item
   }
-  private acceptSuggestOnCursor() {
+  _acceptSuggestOnCursor() {
     let word = ''
-    const currentItem = this.items[this.cursor]
+    const currentItem = this._items[this._cursor]
     if ('id_str' in currentItem) {
       word = '@' + currentItem.screen_name
     } else {
       word = currentItem.topic
     }
-    this.acceptSuggest(word)
+    this._acceptSuggest(word)
   }
-  private acceptSuggest(word: string) {
-    const { indices } = this
+  _acceptSuggest(word: string) {
     const detail = {
-      indices,
+      indices: this._indices,
       word,
     }
     const customEvent = new CustomEvent<AcceptedSuggest>(EVENT_ACCEPT_SUGGEST, { detail })
-    this.komposer.textarea.dispatchEvent(customEvent)
-    this.clear()
+    this._komposer.textarea.dispatchEvent(customEvent)
+    this._clear()
   }
-  private render() {
-    this.suggestArea.innerHTML = ''
+  _render() {
+    this._suggestArea.innerHTML = ''
     const shouldShow =
-      this.komposer.textarea.isSameNode(document.activeElement) && this.hasSuggestItems()
+      this._komposer.textarea.isSameNode(document.activeElement) && this._hasSuggestItems()
     if (shouldShow) {
-      this.suggestArea.style.display = 'block'
-      for (const item of this.items) {
+      this._suggestArea.style.display = 'block'
+      for (const item of this._items) {
         let itemElem: HTMLElement
         if ('id_str' in item) {
-          itemElem = this.createUserItem(item)
+          itemElem = this._createUserItem(item)
         } else {
-          itemElem = this.createHashtagItem(item)
+          itemElem = this._createHashtagItem(item)
         }
-        this.suggestArea.appendChild(itemElem)
+        this._suggestArea.appendChild(itemElem)
       }
     } else {
-      this.suggestArea.style.display = 'none'
+      this._suggestArea.style.display = 'none'
     }
-    this.renderCursor(0)
-    this.relocate()
+    this._renderCursor(0)
+    this._relocate()
   }
-  private relocate() {
-    const { textarea } = this.komposer
+  _relocate() {
+    const { textarea } = this._komposer
     const textareaRect = textarea.getBoundingClientRect()
-    assign(this.suggestArea.style, {
+    assign(this._suggestArea.style, {
       top: `${textareaRect.y + textareaRect.height}px`,
       // 화면폭이 좁으면 왼쪽 여백이 오히려 불편함
       left: window.innerWidth > 500 ? `${textareaRect.x}px` : '0',
-      maxHeight: `${window.innerHeight - this.suggestArea.offsetTop - 10}px`,
+      maxHeight: `${window.innerHeight - this._suggestArea.offsetTop - 10}px`,
       right: '0px',
     })
   }
-  private loadHashFlagsStore() {
+  _loadHashFlagsStore() {
     const reactRoot = document.getElementById('react-root')!.children[0]
     const rEventHandler = getReactEventHandler(reactRoot)
     const store = rEventHandler.children.props.children.props.store
-    this.hashflags = dig(() => store.getState().hashflags.hashflags) || {}
+    this._hashflags = dig(() => store.getState().hashflags.hashflags) || {}
   }
-  public destruct() {
-    this.clear()
-    this.suggestArea.remove()
+  destruct() {
+    this._clear()
+    this._suggestArea.remove()
   }
 }
 
