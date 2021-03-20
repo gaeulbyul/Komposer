@@ -91,6 +91,10 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     constructor(editorRootElem: HTMLElement) {
       this._textareaContainer = document.createElement('div')
       this.textarea = document.createElement('textarea')
+      // (특히 DM에서) 처음 생성될 때 입력칸 높이가 불필요하게 크더라.
+      // 최초에 여기서 1px로 하고, applyKomposer 함수에서 _fitTextareaHeight 호출해서
+      // 높이를 맞춘다.
+      this.textarea.style.height='1px'
       this._editorRootElem = editorRootElem
       this._editorContentElem = force(
         editorRootElem.querySelector('.DraftEditor-editorContainer > div[contenteditable=true]')
@@ -104,12 +108,12 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       this._initializeTextarea()
       this._initializeEvents()
     }
-    static isApplied(elem: HTMLElement) {
-      return elem.classList.contains('komposer-applied')
+    _isApplied() {
+      return this._editorRootElem.classList.contains('komposer-applied')
     }
     applyKomposer() {
       const { _editorRootElem: editorRootElem } = this
-      if (Komposer.isApplied(editorRootElem)) {
+      if (this._isApplied()) {
         return
       }
       editorRootElem.classList.add('komposer-applied')
@@ -120,8 +124,21 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       parentOfEditorRoot.hidden = true
       const grandParentOfEditorRoot = force(parentOfEditorRoot.parentElement)
       grandParentOfEditorRoot.prepend(this._textareaContainer)
+      this._fitTextareaHeight()
       if (editorRootElem.contains(document.activeElement)) {
+        // DM 전송 후 입력칸을 비워준다.
+        // 2021-03-18: DM 전송 후 기존 komposer 및 상위요소가 날라가고 새로 생긴다.
+        // 그래서 "전송 후 비우기"가 작동하지 않아 대신 "새 komposer에 직전 내용 비우기"식으로 구현함
+        if (this.isDM) {
+          this.updateText('')
+        }
         this.textarea.focus()
+        // 크롬에선 위 코드에서 포커스가 가도 입력이 안 되더라.
+        // setTimeout으로 다시 focus를 한다...
+        setTimeout(() => {
+          this.textarea.blur()
+          this.textarea.focus()
+        }, 250)
       }
     }
     updateText(text: string) {
@@ -218,29 +235,9 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
           })
         }
       })
-      // DM 전송 후 입력칸을 비워준다.
-      if (this.isDM) {
-        const sendDMButton = document.querySelector('[data-testid="dmComposerSendButton"]')
-        if (!(sendDMButton instanceof HTMLElement)) {
-          throw new TypeError('dmComposerSendButton is missing')
-        }
-        sendDMButton.addEventListener('click', () => {
-          textarea.value = ''
-          // 그냥 focus 하면 글자입력을 할 수 없다.
-          // 이 시점에서 이미 activeElement 는 textarea 라서
-          // .focus() 메서드를 호출해도 별다른 동작을 하지 않는것으로 추정(?)
-          setTimeout(() => {
-            const { activeElement } = document
-            if (activeElement && textarea.isSameNode(activeElement)) {
-              textarea.blur()
-              textarea.focus()
-            }
-          }, 50)
-        })
-      }
     }
     _getPlaceholderText(): string {
-      let placeholder = '무슨 일이 일어나고 있나요?'
+      let placeholder = this.isDM ? '새 쪽지 보내기' : '무슨 일이 일어나고 있나요?'
       const placeholderElem = this._editorRootElem.querySelector(
         '.public-DraftEditorPlaceholder-root'
       )
