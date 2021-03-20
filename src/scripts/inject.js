@@ -94,7 +94,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       // (특히 DM에서) 처음 생성될 때 입력칸 높이가 불필요하게 크더라.
       // 최초에 여기서 1px로 하고, applyKomposer 함수에서 _fitTextareaHeight 호출해서
       // 높이를 맞춘다.
-      this.textarea.style.height='1px'
+      this.textarea.style.height = '1px'
       this._editorRootElem = editorRootElem
       this._editorContentElem = force(
         editorRootElem.querySelector('.DraftEditor-editorContainer > div[contenteditable=true]')
@@ -246,6 +246,16 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
         if (textContent) {
           placeholder = textContent
         }
+      } else {
+        // 2021-03-20 DM 전송 후 새로 생기는 Komposer 입력칸에선
+        // 위의 방법으로 placeholder를 찾지 못한더라.
+        try {
+          const ph = getReactEventHandler(force(this._editorRootElem.parentElement))?.children
+            ?.props?.placeholder
+          if (typeof ph === 'string') {
+            placeholder = ph
+          }
+        } catch (e) {}
       }
       return placeholder
     }
