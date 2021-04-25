@@ -156,6 +156,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     }
     _getDraftEditorText(): string {
       return this._draftjsEditorState.getCurrentContent().getPlainText()
+      //return this._draftjsEditor.props.editorState.getCurrentContent().getPlainText()
     }
     _updateDraftEditorText(text: string) {
       const { _draftjsEditorState: draftjsEditorState } = this
@@ -720,28 +721,38 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
   const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
   const textareaToSuggesterMap = new WeakMap<HTMLTextAreaElement, KomposerSuggester>()
 
-  function findActiveTextarea(): HTMLTextAreaElement | null {
-    let textareas = document.querySelectorAll('textarea.komposer')
-    if (textareas.length === 0) {
-      return null
-    } else if (textareas.length === 1) {
+  function findActiveTextareas(): HTMLTextAreaElement[] {
+    const textareas = Array.from(document.querySelectorAll('textarea.komposer'))
+    if (textareas.length < 2) {
       // $FlowIgnore
-      return textareas[0]
+      return textareas
     }
-    const toolBar = document.querySelector('[data-testid=toolBar]')
-    if (!(toolBar instanceof HTMLElement)) {
-      return null
-    }
-    const closest = closestWith(toolBar, elem => {
-      textareas = elem.querySelectorAll('textarea.komposer')
-      return textareas.length === 1
+    textareas.length = 0
+    document.querySelectorAll('[data-testid=toolBar]').forEach(toolBar => {
+      if (!(toolBar instanceof HTMLElement)) {
+        return
+      }
+      let textarea: HTMLTextAreaElement | null = null
+      const closest = closestWith(toolBar, elem => {
+        const komposerTextarea = elem.querySelector('textarea.komposer')
+        if (komposerTextarea instanceof HTMLTextAreaElement) {
+          textarea = komposerTextarea
+          return true
+        } else {
+          return false
+        }
+      })
+      if (!textarea) {
+        return
+      }
+      textareas.push(textarea)
     })
-    if (closest) {
-      // $FlowIgnore
-      return textareas[0]
-    } else {
-      return null
-    }
+    // modal 뒤에 가려진 textarea는 active라고 볼 수 없다.
+    // [aria-modal=true]를 통해 거르자.
+    const textareasInTheModal = textareas.filter(elem =>
+      elem.matches('[aria-modal=true] .komposer')
+    )
+    return textareasInTheModal.length > 0 ? textareasInTheModal : textareas
   }
 
   function findEmojiButtonFromTarget(elem: HTMLElement) {
@@ -782,12 +793,10 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       } else {
         emojiStr = emoji.unified
       }
-      const activeTextarea = findActiveTextarea()
-      if (!activeTextarea) {
-        return
-      }
-      const komposer = force(textareaToKomposerMap.get(activeTextarea))
-      komposer.insertAtCursor(emojiStr)
+      findActiveTextareas().forEach(textarea => {
+        const komposer = force(textareaToKomposerMap.get(textarea))
+        komposer.insertAtCursor(emojiStr)
+      })
     })
   }
 
