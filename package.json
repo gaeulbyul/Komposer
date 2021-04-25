@@ -17,8 +17,8 @@
     }
   },
   "devDependencies": {
-    "flow-bin": "^0.146.0",
-    "flow-remove-types": "^2.146.0",
+    "flow-bin": "^0.149.0",
+    "flow-remove-types": "^2.149.0",
     "husky": "^4.3.0",
     "just-scripts": "0.43.0",
     "mkdirp": "1.0.4",
