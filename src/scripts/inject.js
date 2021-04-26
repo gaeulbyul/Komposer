@@ -752,6 +752,20 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     const textareasInTheModal = textareas.filter(elem =>
       elem.matches('[aria-modal=true] .komposer')
     )
+    const textareaInDMDrawer = document.querySelector('[data-testid=DMDrawer] textarea.komposer')
+    if (textareaInDMDrawer instanceof HTMLTextAreaElement) {
+      // DM서랍과 홈 타임라인 입력칸이 둘 다 존재하는 경우,
+      // anchorNode(에모지입력기 버튼을 가리킴)의 위치에 따라 에모지를 입력할 입력칸을 판단한다.
+      const emojiPicker = document.getElementById('emoji_picker_categories_dom_id')
+      if (emojiPicker) {
+        const anchorContained = force(emojiPicker.parentElement?.parentElement?.parentElement)
+        const anchorNode = getReactEventHandler(anchorContained).children._owner.stateNode
+          ._anchorNode
+        if (anchorNode.matches('[data-testid=DMDrawer] div')) {
+          return [textareaInDMDrawer]
+        }
+      }
+    }
     return textareasInTheModal.length > 0 ? textareasInTheModal : textareas
   }
 
