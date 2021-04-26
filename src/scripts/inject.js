@@ -332,8 +332,8 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     _hashflags: HashFlagsObj
     _komposer: Komposer
     */
-    constructor(komposer: Komposer) {
-      this._suggestArea = document.createElement('div')
+    constructor(komposer: Komposer, suggestAreaElem: HTMLElement) {
+      this._suggestArea = suggestAreaElem
       this._items = []
       this._indices = [0, 0]
       this._cursor = 0
@@ -670,7 +670,6 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     }
     destruct() {
       this._clear()
-      this._suggestArea.remove()
     }
   }
 
@@ -870,12 +869,15 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     )
   })
 
+  const suggestArea = document.createElement('div')
+  suggestArea.className = 'komposer-suggest-area'
+
   function applyMagic(elem: HTMLElement) {
     const komposer = new Komposer(elem)
     komposer.applyKomposer()
     textareaToKomposerMap.set(komposer.textarea, komposer)
     if (!komposer.isDM) {
-      const suggester = new KomposerSuggester(komposer)
+      const suggester = new KomposerSuggester(komposer, suggestArea)
       suggester.connect()
       textareaToSuggesterMap.set(komposer.textarea, suggester)
     }
