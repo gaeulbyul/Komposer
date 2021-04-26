@@ -174,11 +174,15 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     }
     _initializeEvents() {
       const { textarea } = this
+      const debouncedUpdateDraftEditorText = _.debounce((text: string) => {
+        this._updateDraftEditorText(text)
+      }, 100)
       textarea.addEventListener('keypress', (event: KeyboardEvent) => {
         // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
         event.stopPropagation()
         const { code } = event
         if (code === 'Enter') {
+          debouncedUpdateDraftEditorText.flush()
           const how = this._handleEnterKey(event)
           if (how !== 'LineBreak') {
             event.preventDefault()
@@ -195,7 +199,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       })
       textarea.addEventListener('input', () => {
         this._fitTextareaHeight()
-        this._updateDraftEditorText(this.textarea.value)
+        debouncedUpdateDraftEditorText(this.textarea.value)
       })
       textarea.addEventListener('paste', (event: ClipboardEvent) => {
         const { clipboardData } = event
