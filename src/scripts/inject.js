@@ -350,7 +350,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       const debouncedSuggest = _.debounce(this._suggest.bind(this), 500)
       // 화살표키를 한 번 눌렀는데도 커서가 두 번 이동하는 경우가 있더라.
       // debounce 걸어서 막음
-      const debouncedMoveCursor = _.debounce(this._moveCursor.bind(this), 100, {
+      const debouncedMoveCursor = _.throttle(this._moveCursor.bind(this), 100, {
         leading: true,
         trailing: false,
       })

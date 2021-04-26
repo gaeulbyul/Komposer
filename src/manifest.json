@@ -24,7 +24,7 @@
 
   "web_accessible_resources": [
     "vendor/twitter-text.min.js",
-    "vendor/lodash-custom.min.js",
+    "vendor/lodash-custom.js",
     "scripts/badges.js",
     "scripts/inject.js"
   ]
