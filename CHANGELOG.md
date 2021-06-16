@@ -1,3 +1,7 @@
+## v0.7.0.4
+
+- twitter.com/intent URL에서 Komposer를 적용하지 않았던 버그 고침
+
 ## v0.7.0.3
 
 - Inline 트윗답글 입력칸에서 에모지입력이 작동하지 않던 버그 고침
