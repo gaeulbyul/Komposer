@@ -19,7 +19,6 @@
       "exclude_matches": [
         "https://*.twitter.com/about",
         "https://*.twitter.com/download",
-        "https://*.twitter.com/intent/*",
         "https://*.twitter.com/privacy",
         "https://*.twitter.com/tos",
         "https://*.twitter.com/*/privacy",
