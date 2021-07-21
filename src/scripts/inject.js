@@ -80,6 +80,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     _draftjsEditorState: any
     _textareaContainer: HTMLElement
     isDM: boolean
+    isSearch: boolean
     textarea: HTMLTextAreaElement
     */
     get disabled(): boolean {
@@ -103,6 +104,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
         this._editorContentElem
       ).children[0].props
       this.isDM = this._editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput'
+      this.isSearch = editorRootElem.matches('[role=search] .DraftEditor-Root')
       this._draftjsEditor = editor
       this._draftjsEditorState = editorState
       this._initializeTextarea()
@@ -121,10 +123,18 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       if (!(parentOfEditorRoot instanceof HTMLElement)) {
         throw new TypeError('parentOfEditorRoot is missing?')
       }
+      let lookingGlassIcon = null
+      if (this.isSearch) {
+        lookingGlassIcon = editorRootElem.closest('label')?.children[0]
+      }
       parentOfEditorRoot.hidden = true
       const grandParentOfEditorRoot = force(parentOfEditorRoot.parentElement)
       grandParentOfEditorRoot.prepend(this._textareaContainer)
       this._fitTextareaHeight()
+      if (lookingGlassIcon) {
+        const label = editorRootElem.closest('label')
+        label?.prepend(lookingGlassIcon)
+      }
       if (editorRootElem.contains(document.activeElement)) {
         // DM 전송 후 입력칸을 비워준다.
         // 2021-03-18: DM 전송 후 기존 komposer 및 상위요소가 날라가고 새로 생긴다.

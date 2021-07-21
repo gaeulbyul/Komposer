@@ -160,11 +160,6 @@ div[id^='typeaheadDropdownWrapped'] {
   vertical-align: text-top;
 }
 
-/* 작은 화면 (모바일) */
-main[role='main'] textarea.komposer {
-  min-height: 8rem;
-}
-
 /* DM 넓은 화면 */
 main[role='main'] aside[role='complementary'] textarea.komposer {
   min-height: initial;
