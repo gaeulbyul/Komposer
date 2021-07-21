@@ -1,3 +1,7 @@
+## v0.7.1.0
+
+- 새 트윗덱 지원
+
 ## v0.7.0.4
 
 - twitter.com/intent URL에서 Komposer를 적용하지 않았던 버그 고침
