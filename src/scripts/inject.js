@@ -962,6 +962,12 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
   }
 
   function initialize() {
+    // 트윗덱 신버전 여부는 .js-app Element 존재여부로 확인한다.
+    const isLegacyTweetDeck = document.querySelector('.js-app')
+    if (isLegacyTweetDeck) {
+      console.info('구 트윗덱으로 판단. 작동종료')
+      return
+    }
     const reactRoot = force(document.getElementById('react-root'))
     if ('_reactRootContainer' in reactRoot) {
       main()

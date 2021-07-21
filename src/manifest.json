@@ -11,11 +11,19 @@
     "128": "icons/icon-128.png"
   },
 
-  "permissions": ["https://twitter.com/*", "https://mobile.twitter.com/*"],
+  "permissions": [
+    "https://twitter.com/*",
+    "https://mobile.twitter.com/*",
+    "https://tweetdeck.twitter.com/*"
+  ],
 
   "content_scripts": [
     {
-      "matches": ["https://twitter.com/*", "https://mobile.twitter.com/*"],
+      "matches": [
+        "https://twitter.com/*",
+        "https://mobile.twitter.com/*",
+        "https://tweetdeck.twitter.com/*"
+      ],
       "exclude_matches": [
         "https://*.twitter.com/about",
         "https://*.twitter.com/download",
@@ -26,7 +34,6 @@
         "https://*.twitter.com/i/release_notes",
         "https://*.twitter.com/i/tweetdeck_release_notes"
       ],
-      "all_frames": true,
       "css": ["styles/komposer.css"],
       "js": ["vendor/browser-polyfill.min.js", "scripts/script.js"]
     }
