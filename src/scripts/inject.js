@@ -1,6 +1,7 @@
 // @flow
 
-type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
+type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak' | 'Ignore'
+type KomposerType = 'Tweet' | 'DM' | 'Search'
 
 {
   const BEARER_TOKEN = `AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA`
@@ -79,10 +80,12 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     _draftjsEditor: any
     _draftjsEditorState: any
     _textareaContainer: HTMLElement
-    isDM: boolean
-    isSearch: boolean
+    _type: KomposerType
     textarea: HTMLTextAreaElement
     */
+    get type(): KomposerType {
+      return this._type
+    }
     get disabled(): boolean {
       return this.textarea.disabled
     }
@@ -103,8 +106,13 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       const { editor, editorState } = getReactEventHandler(
         this._editorContentElem
       ).children[0].props
-      this.isDM = this._editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput'
-      this.isSearch = editorRootElem.matches('[role=search] .DraftEditor-Root')
+      if (this._editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput') {
+        this._type = 'DM'
+      } else if (editorRootElem.matches('[role=search] .DraftEditor-root')) {
+        this._type = 'Search'
+      } else {
+        this._type = 'Tweet'
+      }
       this._draftjsEditor = editor
       this._draftjsEditorState = editorState
       this._initializeTextarea()
@@ -124,7 +132,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
         throw new TypeError('parentOfEditorRoot is missing?')
       }
       let lookingGlassIcon = null
-      if (this.isSearch) {
+      if (this.type === 'Search') {
         lookingGlassIcon = editorRootElem.closest('label')?.children[0]
       }
       parentOfEditorRoot.hidden = true
@@ -139,7 +147,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
         // DM 전송 후 입력칸을 비워준다.
         // 2021-03-18: DM 전송 후 기존 komposer 및 상위요소가 날라가고 새로 생긴다.
         // 그래서 "전송 후 비우기"가 작동하지 않아 대신 "새 komposer에 직전 내용 비우기"식으로 구현함
-        if (this.isDM) {
+        if (this.type === 'DM') {
           this.updateText('')
         }
         this.textarea.focus()
@@ -252,7 +260,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
       })
     }
     _getPlaceholderText(): string {
-      let placeholder = this.isDM ? '새 쪽지 보내기' : '무슨 일이 일어나고 있나요?'
+      let placeholder = this.type === 'DM' ? '새 쪽지 보내기' : '무슨 일이 일어나고 있나요?'
       const placeholderElem = this._editorRootElem.querySelector(
         '.public-DraftEditorPlaceholder-root'
       )
@@ -294,18 +302,21 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
         throw new Error('I can only handle Enter key')
       }
       const { ctrlKey, shiftKey } = event
-      if (this.isDM) {
-        if (shiftKey) {
-          return 'LineBreak'
-        } else {
-          return 'SendDM'
-        }
-      } else {
-        if (ctrlKey) {
-          return 'SendTweet'
-        } else {
-          return 'LineBreak'
-        }
+      switch (this.type) {
+        case 'DM':
+          if (shiftKey) {
+            return 'LineBreak'
+          } else {
+            return 'SendDM'
+          }
+        case 'Tweet':
+          if (ctrlKey) {
+            return 'SendTweet'
+          } else {
+            return 'LineBreak'
+          }
+        case 'Search':
+          return 'Ignore'
       }
     }
     _sendTweet() {
@@ -886,7 +897,7 @@ type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak'
     const komposer = new Komposer(elem)
     komposer.applyKomposer()
     textareaToKomposerMap.set(komposer.textarea, komposer)
-    if (!komposer.isDM) {
+    if (komposer.type === 'Tweet') {
       const suggester = new KomposerSuggester(komposer, suggestArea)
       suggester.connect()
       textareaToSuggesterMap.set(komposer.textarea, suggester)
