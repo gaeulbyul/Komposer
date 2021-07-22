@@ -32,7 +32,6 @@ function* getRemovedElementsFromMutations(mutations: MutationRecord[]) {
 function findActiveTextareas(): HTMLTextAreaElement[] {
   const textareas = Array.from(document.querySelectorAll<HTMLTextAreaElement>('textarea.komposer'))
   if (textareas.length < 2) {
-    // $FlowIgnore
     return textareas
   }
   textareas.length = 0

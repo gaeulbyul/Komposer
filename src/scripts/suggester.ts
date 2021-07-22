@@ -169,7 +169,6 @@ export default class KomposerSuggester {
     this.indices = entity.indices
     let result: TypeaheadResult
     if ('screenName' in entity) {
-      // $FlowIssue
       const screenName = entity.screenName.toLowerCase()
       if (userSuggestionsCache.has(screenName)) {
         result = userSuggestionsCache.get(screenName)!
@@ -178,7 +177,6 @@ export default class KomposerSuggester {
         userSuggestionsCache.set(screenName, result)
       }
     } else if ('hashtag' in entity) {
-      // $FlowIssue
       const hashtag = entity.hashtag.toLowerCase()
       if (hashtagSuggestionsCache.has(hashtag)) {
         result = hashtagSuggestionsCache.get(hashtag)!
@@ -225,11 +223,9 @@ export default class KomposerSuggester {
       className: 'primary',
     })
     if (user.verified) {
-      // $FlowIssue
       nickNameLabel.innerHTML += VERIFIED_BADGE
     }
     if (user.is_protected) {
-      // $FlowIssue
       nickNameLabel.innerHTML += PROTECTED_ICON
     }
     const userNameLabel = label.appendChild(document.createElement('div'))
@@ -288,10 +284,8 @@ export default class KomposerSuggester {
     let word = ''
     const currentItem = this.items[this.cursor]
     if ('id_str' in currentItem) {
-      // $FlowIssue
       word = '@' + currentItem.screen_name
     } else {
-      // $FlowIssue
       word = currentItem.topic
     }
     this.acceptSuggest(word)
@@ -315,10 +309,8 @@ export default class KomposerSuggester {
       for (const item of this.items) {
         let itemElem: HTMLElement
         if ('id_str' in item) {
-          // $FlowIssue
           itemElem = this.createUserItem(item)
         } else {
-          // $FlowIssue
           itemElem = this.createHashtagItem(item)
         }
         this.suggestArea.appendChild(itemElem)
@@ -333,9 +325,7 @@ export default class KomposerSuggester {
     const { textarea } = this.komposer
     const textareaRect = textarea.getBoundingClientRect()
     assign(this.suggestArea.style, {
-      // $FlowIssue
       top: `${textareaRect.y + textareaRect.height}px`,
-      // $FlowIssue
       left: window.innerWidth > 500 ? `${textareaRect.x}px` : '0', // 화면폭이 좁으면 왼쪽 여백이 오히려 불편함
       maxHeight: `${window.innerHeight - this.suggestArea.offsetTop - 10}px`,
       right: '0px',
