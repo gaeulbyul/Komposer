@@ -3,7 +3,7 @@ import throttle from 'lodash-es/throttle'
 import twitterText from 'twitter-text'
 
 import type Komposer from './komposer'
-import TypeaheadAPI from './typeahead'
+import { typeaheadHashTags, typeaheadUserNames } from './typeahead'
 import { EVENT_ACCEPT_SUGGEST, assign, getReactEventHandler } from './common'
 import { VERIFIED_BADGE, PROTECTED_ICON } from './badges'
 
@@ -174,7 +174,7 @@ export default class KomposerSuggester {
       if (userSuggestionsCache.has(screenName)) {
         result = userSuggestionsCache.get(screenName)!
       } else {
-        result = await TypeaheadAPI.typeaheadUserNames(screenName, text)
+        result = await typeaheadUserNames(screenName, text)
         userSuggestionsCache.set(screenName, result)
       }
     } else if ('hashtag' in entity) {
@@ -183,7 +183,7 @@ export default class KomposerSuggester {
       if (hashtagSuggestionsCache.has(hashtag)) {
         result = hashtagSuggestionsCache.get(hashtag)!
       } else {
-        result = await TypeaheadAPI.typeaheadHashTags(hashtag, text)
+        result = await typeaheadHashTags(hashtag, text)
         hashtagSuggestionsCache.set(hashtag, result)
       }
     } else {
