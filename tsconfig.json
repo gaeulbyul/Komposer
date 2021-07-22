@@ -1,0 +1,27 @@
+{
+  "include": ["src/**/*"],
+  "exclude": ["src/vendor/*", "*/**/flycheck_*"],
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react",
+    "sourceMap": false,
+    "outDir": "build/",
+    "rootDir": "src/",
+    "strict": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["node_modules/@types", "node_modules/web-ext-types", "src/scripts/types"]
+  }
+}

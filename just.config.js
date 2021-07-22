@@ -13,17 +13,20 @@ const cp = util.promisify(ncp)
 const rmrf = util.promisify(rimraf)
 const exec = util.promisify(proc.exec)
 
-task('build-js', async () => {
-  await exec('flow-remove-types -p --out-dir build/ src/')
+task('check-tsc', async () => {
+  await exec('tsc --noEmit')
 })
 
-task('build-assets', async () => {
-  await cp('src/', 'build/', {
-    stopOnErr: true,
-    filter(filename) {
-      return !/\.js$/.test(filename)
-    },
-  })
+task('build', async () => {
+  await Promise.all([
+    cp('src/', 'build/', {
+      stopOnErr: true,
+      filter(filename) {
+        return !/\.tsx?$/.test(filename)
+      },
+    }),
+    exec('webpack'),
+  ])
 })
 
 task('clean', async () => {
@@ -42,11 +45,6 @@ task('srczip', async () => {
   await exec(`git archive -9 -v -o ./dist/${name}-v${version}.Source.zip HEAD`)
 })
 
-task('check-flow', async () => {
-  await exec('flow check')
-})
-
-task('build', parallel('build-js', 'build-assets'))
-task('default', series('clean', 'check-flow', 'build'))
+task('default', series('clean', 'build'))
 task('dist', parallel('zip', 'srczip'))
 task('all', series('default', 'dist'))

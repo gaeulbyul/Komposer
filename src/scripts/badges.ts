@@ -1,4 +1,4 @@
-const VERIFIED_BADGE = `\
+export const VERIFIED_BADGE = `\
 <svg viewBox="0 0 24 24" aria-label="인증된 계정"
 class="komposer-badge" style="color:#1da1f2">
 <g>
@@ -6,7 +6,7 @@ class="komposer-badge" style="color:#1da1f2">
 </g>
 </svg>`
 
-const PROTECTED_ICON = `\
+export const PROTECTED_ICON = `\
 <svg viewBox="0 0 24 24" aria-label="비공개 계정"
 class="komposer-badge">
 <g>

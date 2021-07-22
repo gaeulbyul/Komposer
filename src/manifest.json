@@ -35,14 +35,9 @@
         "https://*.twitter.com/i/tweetdeck_release_notes"
       ],
       "css": ["styles/komposer.css"],
-      "js": ["vendor/browser-polyfill.min.js", "scripts/script.js"]
+      "js": ["vendor/browser-polyfill.min.js", "scripts/loader.js"]
     }
   ],
 
-  "web_accessible_resources": [
-    "vendor/twitter-text.min.js",
-    "vendor/lodash-custom.js",
-    "scripts/badges.js",
-    "scripts/inject.js"
-  ]
+  "web_accessible_resources": ["bundled/komposer.bun.js"]
 }
