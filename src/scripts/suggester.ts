@@ -159,13 +159,12 @@ export default class KomposerSuggester {
       return
     }
     this.clear()
-    this.currentText = text
     const entities = twitterText.extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
     if (!entity) {
-      this.clear()
       return
     }
+    this.currentText = text
     this.indices = entity.indices
     let result: TypeaheadResult
     if ('screenName' in entity) {
@@ -188,6 +187,9 @@ export default class KomposerSuggester {
       this.clear()
       return
     }
+    // 이전 결과가 남으면서 현재 결과와 섞이는 걸 막기 위해
+    // push 직전에 아이템 목록을 비운다.
+    this.items.length = 0
     let count = 1
     for (const userOrTopic of [...result.users, ...result.topics]) {
       this.items.push(userOrTopic)
@@ -306,7 +308,7 @@ export default class KomposerSuggester {
       activeElement && this.komposer.textarea.isSameNode(activeElement) && this.hasSuggestItems()
     if (shouldShow) {
       this.suggestArea.style.display = 'block'
-      for (const item of this.items) {
+      for (const item of items) {
         let itemElem: HTMLElement
         if ('id_str' in item) {
           itemElem = this.createUserItem(item)
