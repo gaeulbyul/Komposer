@@ -1,7 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 
-module.exports = {
+const mv2 = {
   mode: 'development',
   devtool: 'inline-source-map',
   entry: './src/scripts/main.ts',
@@ -28,3 +28,11 @@ module.exports = {
     poll: 1200,
   },
 }
+
+const mv3 = { ...mv2 }
+mv3.output = {
+  ...mv2.output,
+  path: `${__dirname}/build-v3/bundled`,
+}
+
+module.exports = [mv2, mv3]

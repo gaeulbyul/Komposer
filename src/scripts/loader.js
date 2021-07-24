@@ -9,9 +9,21 @@ async function injectScript(src) {
   })
 }
 
+function* getScriptPaths() {
+  const resources = browser.runtime.getManifest().web_accessible_resources
+  for (const resource of resources) {
+    if (typeof resource === 'string') {
+      // Manifest V2
+      yield resource
+    } else {
+      // Manifest V3
+      yield* resource.resources
+    }
+  }
+}
+
 async function loadScripts() {
-  const scripts = browser.runtime.getManifest().web_accessible_resources
-  for (const path of scripts) {
+  for (const path of getScriptPaths()) {
     if (!path.endsWith('.js')) {
       continue
     }
