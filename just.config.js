@@ -42,7 +42,7 @@ task('clean', async () => {
 task('zip', async () => {
   const filename = `${name}-v${version}.zip`
   const filenamev3 = `${name}-v${version} [MV3].zip`
-  logger.info(`zipping into "${filename}"...`)
+  logger.info(`zipping into "${filename}" / "${filenamev3}"...`)
   await mkdirp('dist/')
   await Promise.all([
     exec(`7z a -r "dist/${filename}" build/.`),
