@@ -201,7 +201,7 @@ export default class Komposer {
         if (typeof ph === 'string') {
           placeholder = ph
         }
-      } catch (e) {}
+      } catch {}
     }
     return placeholder
   }
