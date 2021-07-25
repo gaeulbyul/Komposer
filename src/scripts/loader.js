@@ -10,7 +10,7 @@ async function injectScript(src) {
 }
 
 function* getScriptPaths() {
-  const resources = browser.runtime.getManifest().web_accessible_resources
+  const resources = chrome.runtime.getManifest().web_accessible_resources
   for (const resource of resources) {
     if (typeof resource === 'string') {
       // Manifest V2
@@ -27,7 +27,7 @@ async function loadScripts() {
     if (!path.endsWith('.js')) {
       continue
     }
-    const src = browser.runtime.getURL(path)
+    const src = chrome.runtime.getURL(path)
     await injectScript(src)
   }
 }

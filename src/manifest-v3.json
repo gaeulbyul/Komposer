@@ -36,7 +36,7 @@
         "https://*.twitter.com/i/tweetdeck_release_notes"
       ],
       "css": ["styles/komposer.css"],
-      "js": ["vendor/browser-polyfill.min.js", "scripts/loader.js"]
+      "js": ["scripts/loader.js"]
     }
   ],
 
