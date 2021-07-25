@@ -308,7 +308,7 @@ export default class KomposerSuggester {
       activeElement && this.komposer.textarea.isSameNode(activeElement) && this.hasSuggestItems()
     if (shouldShow) {
       this.suggestArea.style.display = 'block'
-      for (const item of items) {
+      for (const item of this.items) {
         let itemElem: HTMLElement
         if ('id_str' in item) {
           itemElem = this.createUserItem(item)
