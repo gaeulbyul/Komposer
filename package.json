@@ -13,7 +13,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "tsc --noEmit && pretty-quick --staged"
     }
   },
   "devDependencies": {
