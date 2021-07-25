@@ -134,6 +134,9 @@ export default class Komposer {
           case 'SendTweet':
             this.sendTweet()
             break
+          case 'Submit':
+            this.submitSearch()
+            break
         }
       }
     })
@@ -236,7 +239,7 @@ export default class Komposer {
           return 'LineBreak'
         }
       case 'Search':
-        return 'Ignore'
+        return 'Submit'
     }
   }
   private sendTweet() {
@@ -260,5 +263,9 @@ export default class Komposer {
     }
     sendDMButton.click()
     this.fitTextareaHeight()
+  }
+  private submitSearch() {
+    const form = this.textarea.closest('form')!
+    form.requestSubmit()
   }
 }
