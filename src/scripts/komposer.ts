@@ -66,9 +66,6 @@ export default class Komposer {
       label?.prepend(lookingGlassIcon)
     }
     if (editorRootElem.contains(document.activeElement)) {
-      // DM 전송 후 입력칸을 비워준다.
-      // 2021-03-18: DM 전송 후 기존 komposer 및 상위요소가 날라가고 새로 생긴다.
-      // 그래서 "전송 후 비우기"가 작동하지 않아 대신 "새 komposer에 직전 내용 비우기"식으로 구현함
       if (this.type === 'DM') {
         this.updateText('')
       }
@@ -262,7 +259,12 @@ export default class Komposer {
       return
     }
     sendDMButton.click()
-    this.fitTextareaHeight()
+    // updateText를 곧바로 하면 DM전송 실패하더라.
+    // setTimeout으로 약간의 딜레이를 준다.
+    setTimeout(() => {
+      this.updateText('')
+      this.fitTextareaHeight()
+    }, 1)
   }
   private submitSearch() {
     const form = this.textarea.closest('form')!
