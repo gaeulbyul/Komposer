@@ -260,11 +260,18 @@ export default class Komposer {
     }
     sendDMButton.click()
     // updateText를 곧바로 하면 DM전송 실패하더라.
-    // setTimeout으로 약간의 딜레이를 준다.
+    // setTimeout으로 약간의 딜레이를 준다. (1은 너무 짧다..)
+    // 이 때, 딜레이 도중 텍스트 수정을 막기 위해 임시로 readOnly를 걸어둔다.
+    this.textarea.readOnly = true
     setTimeout(() => {
-      this.updateText('')
-      this.fitTextareaHeight()
-    }, 1)
+      try {
+        this.updateText('')
+        this.fitTextareaHeight()
+      } finally {
+        this.textarea.readOnly = false
+        this.textarea.focus()
+      }
+    }, 250)
   }
   private submitSearch() {
     const form = this.textarea.closest('form')!
