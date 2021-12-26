@@ -12,6 +12,8 @@
     "sourceMap": false,
     "outDir": "build/",
     "rootDir": "src/",
+    "incremental": true,
+    "tsBuildInfoFile": "./.cache/tsBuildInfo.dat",
     "strict": true,
     "alwaysStrict": true,
     "noUnusedLocals": true,

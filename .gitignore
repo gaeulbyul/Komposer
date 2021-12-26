@@ -3,6 +3,7 @@
 /.idea/
 /.vs/
 /.vscode/
+/.cache/
 /node_modules/
 /dist/
 /build*/
