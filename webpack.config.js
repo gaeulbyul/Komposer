@@ -1,5 +1,5 @@
-const path = require('path')
-const webpack = require('webpack')
+// const path = require('path')
+// const webpack = require('webpack')
 
 const mv2 = {
   mode: 'development',
@@ -15,7 +15,7 @@ const mv2 = {
       {
         test: /\.tsx?$/,
         // use: 'ts-loader',
-        use: 'swc-loader',
+        use: require.resolve('swc-loader'),
         exclude: /node_modules/,
       },
     ],
