@@ -11,11 +11,6 @@
     "build": "just default",
     "just": "just"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsc --noEmit && dprint fmt"
-    }
-  },
   "devDependencies": {
     "@swc/cli": "^0.1.46",
     "@swc/core": "^1.2.66",
@@ -23,7 +18,7 @@
     "@types/twitter-text": "^3.1.1",
     "dprint": "^0.19.2",
     "fs-extra": "^10.0.0",
-    "husky": "^4.3.0",
+    "husky": "^7.0.4",
     "just-scripts": "0.43.0",
     "mkdirp": "1.0.4",
     "ncp": "2.0.0",
