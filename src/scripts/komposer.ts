@@ -1,5 +1,5 @@
 import debounce from 'lodash-es/debounce'
-import { getReactEventHandler, closestWith } from './common'
+import { closestWith, getReactEventHandler } from './common'
 
 export default class Komposer {
   private readonly editorContentElem: HTMLElement
@@ -25,7 +25,7 @@ export default class Komposer {
     // 높이를 맞춘다.
     this.textarea.style.height = '1px'
     this.editorContentElem = editorRootElem.querySelector(
-      '.DraftEditor-editorContainer > div[contenteditable=true]'
+      '.DraftEditor-editorContainer > div[contenteditable=true]',
     )!
     const { editor, editorState } = getReactEventHandler(this.editorContentElem).children[0].props
     if (this.editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput') {
@@ -93,7 +93,7 @@ export default class Komposer {
   }
   private getDraftEditorText(): string {
     return this.draftjsEditorState.getCurrentContent().getPlainText()
-    //return this._draftjsEditor.props.editorState.getCurrentContent().getPlainText()
+    // return this._draftjsEditor.props.editorState.getCurrentContent().getPlainText()
   }
   private updateDraftEditorText(text: string) {
     const { draftjsEditorState: draftjsEditorState } = this

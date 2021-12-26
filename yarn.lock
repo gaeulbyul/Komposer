@@ -1234,6 +1234,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dprint@npm:^0.19.2":
+  version: 0.19.2
+  resolution: "dprint@npm:0.19.2"
+  bin:
+    dprint: bin.js
+  checksum: d9889c2710bd06924d5db9a16f684e011e06d700160da76d036fdd755872e6c1bc12f6631061777a1e592e6471ba7aac7245e47af719954e61893b1668547544
+  languageName: node
+  linkType: hard
+
 "duplexify@npm:^3.4.2, duplexify@npm:^3.6.0":
   version: 3.7.1
   resolution: "duplexify@npm:3.7.1"
@@ -2276,6 +2285,7 @@ __metadata:
     "@swc/core": ^1.2.66
     "@types/lodash-es": ^4.17.4
     "@types/twitter-text": ^3.1.1
+    dprint: ^0.19.2
     fs-extra: ^10.0.0
     husky: ^4.3.0
     just-scripts: 0.43.0

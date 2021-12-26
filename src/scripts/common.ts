@@ -14,7 +14,7 @@ export function getReactEventHandler(target: Element): any {
 
 export function closestWith(
   elem: HTMLElement,
-  filteringFn: (elem: HTMLElement) => boolean
+  filteringFn: (elem: HTMLElement) => boolean,
 ): HTMLElement | null {
   let { parentElement } = elem
   while (parentElement instanceof HTMLElement) {

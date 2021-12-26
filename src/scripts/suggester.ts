@@ -2,10 +2,10 @@ import debounce from 'lodash-es/debounce'
 import throttle from 'lodash-es/throttle'
 import twitterText from 'twitter-text'
 
+import { PROTECTED_ICON, VERIFIED_BADGE } from './badges'
+import { assign, EVENT_ACCEPT_SUGGEST, getReactEventHandler } from './common'
 import type Komposer from './komposer'
 import { typeaheadHashTags, typeaheadUserNames } from './typeahead'
-import { EVENT_ACCEPT_SUGGEST, assign, getReactEventHandler } from './common'
-import { VERIFIED_BADGE, PROTECTED_ICON } from './badges'
 
 const userSuggestionsCache = new Map<string, TypeaheadResult>()
 const hashtagSuggestionsCache = new Map<string, TypeaheadResult>()
@@ -18,7 +18,7 @@ export default class KomposerSuggester {
   private hashflags: HashFlagsObj
   public constructor(
     private readonly komposer: Komposer,
-    private readonly suggestArea: HTMLElement
+    private readonly suggestArea: HTMLElement,
   ) {
     this.items = []
     this.indices = [0, 0]
@@ -128,9 +128,8 @@ export default class KomposerSuggester {
             top: item.offsetTop,
           })
         }
-        const overflowedOnBottom =
-          this.suggestArea.scrollTop + this.suggestArea.clientHeight <
-          item.offsetTop + item.offsetHeight
+        const overflowedOnBottom = this.suggestArea.scrollTop + this.suggestArea.clientHeight
+          < item.offsetTop + item.offsetHeight
         if (overflowedOnBottom) {
           this.suggestArea.scrollTo({
             behavior: 'smooth',
@@ -304,8 +303,8 @@ export default class KomposerSuggester {
   private render() {
     this.suggestArea.innerHTML = ''
     const { activeElement } = document
-    const shouldShow =
-      activeElement && this.komposer.textarea.isSameNode(activeElement) && this.hasSuggestItems()
+    const shouldShow = activeElement && this.komposer.textarea.isSameNode(activeElement)
+      && this.hasSuggestItems()
     if (shouldShow) {
       this.suggestArea.style.display = 'block'
       for (const item of this.items) {

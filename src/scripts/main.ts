@@ -1,6 +1,6 @@
-import KomposerSuggester from './suggester'
+import { closestWith, EVENT_SENDING, getReactEventHandler } from './common'
 import Komposer from './komposer'
-import { EVENT_SENDING, getReactEventHandler, closestWith } from './common'
+import KomposerSuggester from './suggester'
 
 const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
 const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
@@ -58,7 +58,7 @@ function findActiveTextareas(): HTMLTextAreaElement[] {
   // [aria-modal=true]를 통해 거르자.
   const textareasInTheModal = textareas.filter(elem => elem.matches('[aria-modal=true] .komposer'))
   const textareaInDMDrawer = document.querySelector<HTMLTextAreaElement>(
-    '[data-testid=DMDrawer] textarea.komposer'
+    '[data-testid=DMDrawer] textarea.komposer',
   )
   if (textareaInDMDrawer instanceof HTMLTextAreaElement) {
     // DM서랍과 홈 타임라인 입력칸이 둘 다 존재하는 경우,
@@ -168,7 +168,7 @@ const progressbarObserver = new MutationObserver(mutations => {
       detail: {
         disabled,
       },
-    })
+    }),
   )
 })
 
