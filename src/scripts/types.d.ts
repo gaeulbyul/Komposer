@@ -1,4 +1,4 @@
-declare type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak' | 'Submit'
+declare type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak' | 'Submit' | 'Ignore'
 declare type KomposerType = 'Tweet' | 'DM' | 'Search'
 
 declare type EventHandler = (event: Event) => void

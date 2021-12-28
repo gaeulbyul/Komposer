@@ -24,7 +24,7 @@ export default class Komposer {
     // 최초에 여기서 1px로 하고, applyKomposer 함수에서 _fitTextareaHeight 호출해서
     // 높이를 맞춘다.
     this.textarea.style.height = '1px'
-    this.editorContentElem = editorRootElem.querySelector(
+    this.editorContentElem = editorRootElem.querySelector<HTMLElement>(
       '.DraftEditor-editorContainer > div[contenteditable=true]',
     )!
     const { editor, editorState } = getReactEventHandler(this.editorContentElem).children[0].props
@@ -134,6 +134,8 @@ export default class Komposer {
           case 'Submit':
             this.submitSearch()
             break
+          case 'Ignore':
+            break
         }
       }
     })
@@ -221,16 +223,19 @@ export default class Komposer {
     if (event.code !== 'Enter') {
       throw new Error('I can only handle Enter key')
     }
-    const { ctrlKey, shiftKey } = event
+    // metaKey = macOS에서의 Command 키
+    const { ctrlKey, shiftKey, metaKey } = event
     switch (this.type) {
       case 'DM':
         if (shiftKey) {
           return 'LineBreak'
+        } else if (metaKey) {
+          return 'Ignore'
         } else {
           return 'SendDM'
         }
       case 'Tweet':
-        if (ctrlKey) {
+        if (ctrlKey || metaKey) {
           return 'SendTweet'
         } else {
           return 'LineBreak'
