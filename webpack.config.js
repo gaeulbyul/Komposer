@@ -2,7 +2,7 @@
 // const webpack = require('webpack')
 
 const mv2 = {
-  mode: 'development',
+  // mode: 'development',
   devtool: 'inline-source-map',
   entry: './src/scripts/main.ts',
   output: {
@@ -23,9 +23,6 @@ const mv2 = {
   plugins: [],
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
-  },
-  watchOptions: {
-    poll: 1200,
   },
 }
 

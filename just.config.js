@@ -19,7 +19,7 @@ task('check-tsc', async () => {
 })
 
 task('webpack', async () => {
-  await exec('webpack-cli')
+  await exec('webpack-cli --mode=production')
 })
 
 task('copy-assets', async () => {
