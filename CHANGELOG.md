@@ -1,3 +1,7 @@
+## v0.8.0.5
+
+- macOS에서, Command+Enter 키 조합으로 트윗전송이 작동하도록 함 (재수정)
+
 ## v0.8.0.4
 
 - macOS에서, Command+Enter 키 조합으로 트윗전송이 작동하도록 함

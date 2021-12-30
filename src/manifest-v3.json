@@ -3,8 +3,8 @@
   "name": "Komposer",
   "description": "트윗입력 도중 한글이 짤리지 않게 합니다.",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
-  "version": "0.8.0.4",
-  "version_name": "0.8.0.4 [MV3]",
+  "version": "0.8.0.5",
+  "version_name": "0.8.0.5 [MV3]",
   "homepage_url": "https://github.com/gaeulbyul/Komposer",
   "icons": {
     "48": "icons/icon-48.png",
