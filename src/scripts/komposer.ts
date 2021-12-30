@@ -114,10 +114,13 @@ export default class Komposer {
     const debouncedUpdateDraftEditorText = debounce((text: string) => {
       this.updateDraftEditorText(text)
     }, 100)
-    textarea.addEventListener('keypress', (event: KeyboardEvent) => {
-      // 슬래시 등 일부 문자에서 단축키로 작동하는 것을 막음
-      event.stopPropagation()
+    textarea.addEventListener('keydown', (event: KeyboardEvent) => {
       const { code } = event
+      // 한글 조합 중 Enter 이벤트가 두 번 발생하는 현상을 막는다.
+      // https://www.inflearn.com/questions/9010
+      if (event.isComposing) {
+        return
+      }
       if (code === 'Enter') {
         debouncedUpdateDraftEditorText.flush()
         const how = this.handleEnterKey(event)
