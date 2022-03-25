@@ -5,10 +5,12 @@ export function assign<T>(obj: T, anotherObj: Partial<T>): void {
   Object.assign(obj, anotherObj)
 }
 
+function isReactPropsKey(name: string) {
+  return name.startsWith('__reactProps') || name.startsWith('__reactEventHandlers')
+}
+
 export function getReactEventHandler(target: Element): any {
-  const key = Object.keys(target)
-    .filter((k: string) => k.startsWith('__reactEventHandlers'))
-    .pop()
+  const key = Object.keys(target).find(isReactPropsKey)
   return key ? (target as any)[key] : null
 }
 
