@@ -5,6 +5,7 @@ import KomposerSuggester from './suggester'
 const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
 const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
 const textareaToSuggesterMap = new WeakMap<HTMLTextAreaElement, KomposerSuggester>()
+const emojiClickEventListening = new WeakSet<HTMLElement>()
 
 const suggestArea = document.createElement('div')
 suggestArea.className = 'komposer-suggest-area'
@@ -91,32 +92,41 @@ function findEmojiButtonFromTarget(elem: HTMLElement) {
 }
 
 function integrateEmojiPicker() {
-  document.addEventListener('click', (event: MouseEvent) => {
-    const { target } = event
-    if (!(target instanceof HTMLElement)) {
-      return
+  const emojiPicker = document.getElementById('emoji_picker_categories_dom_id')
+  if (emojiPicker instanceof HTMLElement) {
+    if (!emojiClickEventListening.has(emojiPicker)) {
+      emojiClickEventListening.add(emojiPicker)
+      emojiPicker.removeEventListener('click', onEmojiButtonClicked)
+      emojiPicker.addEventListener('click', onEmojiButtonClicked)
     }
-    const emojiButton = findEmojiButtonFromTarget(target)
-    if (!emojiButton) {
-      return
-    }
-    event.stopPropagation()
-    const emojiDataElem = emojiButton.parentElement?.parentElement!
-    const childOfEmojiDataElem = getReactEventHandler(emojiDataElem)?.children
-    // 피부색을 적용할 수 있는 에모지는 activeSkinTone에 값(object)이 들어있고,
-    // 그렇지 않은 에모지는 activeSkinTone이 undefined다.
-    const activeSkinTone = childOfEmojiDataElem?._owner?.stateNode?.props?.activeSkinTone
-    const emoji = childOfEmojiDataElem?.props?.emoji
-    let emojiStr = ''
-    if (emoji.skin_variations && activeSkinTone && activeSkinTone.codepoint) {
-      emojiStr = emoji.skin_variations[activeSkinTone.codepoint].unified
-    } else {
-      emojiStr = emoji.unified
-    }
-    findActiveTextareas().forEach(textarea => {
-      const komposer = textareaToKomposerMap.get(textarea)!
-      komposer.insertAtCursor(emojiStr)
-    })
+  }
+}
+
+function onEmojiButtonClicked(event: MouseEvent) {
+  const { target } = event
+  if (!(target instanceof HTMLElement)) {
+    return
+  }
+  const emojiButton = findEmojiButtonFromTarget(target)
+  if (!emojiButton) {
+    return
+  }
+  event.stopPropagation()
+  const emojiDataElem = emojiButton.parentElement?.parentElement!
+  const childOfEmojiDataElem = getReactEventHandler(emojiDataElem)?.children
+  // 피부색을 적용할 수 있는 에모지는 activeSkinTone에 값(object)이 들어있고,
+  // 그렇지 않은 에모지는 activeSkinTone이 undefined다.
+  const activeSkinTone = childOfEmojiDataElem?._owner?.stateNode?.props?.activeSkinTone
+  const emoji = childOfEmojiDataElem?.props?.emoji
+  let emojiStr = ''
+  if (emoji.skin_variations && activeSkinTone && activeSkinTone.codepoint) {
+    emojiStr = emoji.skin_variations[activeSkinTone.codepoint].unified
+  } else {
+    emojiStr = emoji.unified
+  }
+  findActiveTextareas().forEach(textarea => {
+    const komposer = textareaToKomposerMap.get(textarea)!
+    komposer.insertAtCursor(emojiStr)
   })
 }
 
@@ -231,6 +241,7 @@ function main() {
         }
       }
     }
+    integrateEmojiPicker()
   }).observe(document.body, {
     subtree: true,
     characterData: true,
@@ -238,7 +249,6 @@ function main() {
   })
   applyMagicEach(document.querySelectorAll('.DraftEditor-root'))
   observerProgressBarEach(document.querySelectorAll('[role=progressbar]'))
-  integrateEmojiPicker()
   const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   if (colorThemeTag instanceof HTMLMetaElement) {
     toggleNightMode(colorThemeTag)
