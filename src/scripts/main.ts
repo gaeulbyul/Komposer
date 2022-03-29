@@ -37,9 +37,9 @@ function findActiveTextareas(): HTMLTextAreaElement[] {
     return textareas
   }
   textareas.length = 0
-  document.querySelectorAll('[data-testid=toolBar]').forEach(toolBar => {
+  for (const toolBar of document.querySelectorAll('[data-testid=toolBar]')) {
     if (!(toolBar instanceof HTMLElement)) {
-      return
+      continue
     }
     let textarea: HTMLTextAreaElement | null = null
     closestWith(toolBar, elem => {
@@ -52,10 +52,10 @@ function findActiveTextareas(): HTMLTextAreaElement[] {
       }
     })
     if (!textarea) {
-      return
+      continue
     }
     textareas.push(textarea)
-  })
+  }
   // modal 뒤에 가려진 textarea는 active라고 볼 수 없다.
   // [aria-modal=true]를 통해 거르자.
   const textareasInTheModal = textareas.filter(elem => elem.matches('[aria-modal=true] .komposer'))
@@ -116,12 +116,10 @@ function onDMSendButtonClicked(event: MouseEvent) {
     return
   }
   const dmTextArea = findActiveTextareas().find(
-    te => te.getAttribute('data-komposer-type') === 'DM',
+    te => te.dataset.komposerType === 'DM',
   )!
   const dmKomposer = textareaToKomposerMap.get(dmTextArea)!
-  setTimeout(() => {
-    dmKomposer.updateText('')
-  }, 100)
+  dmKomposer.clearDM()
 }
 
 function interceptDMSendButton() {
@@ -181,7 +179,7 @@ function getBrightness(hexColor: string): number {
 // 밝기를 구해 색상테마를 맞춘다.
 function toggleNightMode(themeElem: HTMLMetaElement) {
   let themeColor = themeElem.content.toUpperCase()
-  const bodyStyleRaw = document.body?.getAttribute('style') || ''
+  const bodyStyleRaw = document.body.getAttribute('style') || ''
   const darkReaderMatch = /--darkreader-inline-bgcolor:(#[0-9A-Fa-f]{6})/.exec(bodyStyleRaw)
   if (darkReaderMatch) {
     themeColor = darkReaderMatch[1]
@@ -197,7 +195,7 @@ function toggleNightMode(themeElem: HTMLMetaElement) {
       themeColor = '#000000'
     }
   }
-  document.body?.setAttribute('data-komposer-theme', themeColor)
+  document.body.dataset.komposerTheme = themeColor
 }
 
 const progressbarObserver = new MutationObserver(mutations => {
@@ -248,16 +246,9 @@ function observeProgressBar(elem: HTMLElement) {
 }
 
 function main() {
-  function applyMagicEach(elems: NodeListOf<HTMLElement>) {
-    elems.forEach(applyMagic)
-  }
-  function observerProgressBarEach(elems: NodeListOf<HTMLElement>) {
-    elems.forEach(observeProgressBar)
-  }
   new MutationObserver(mutations => {
     for (const elem of getAddedElementsFromMutations(mutations)) {
-      const editorRootElems = elem.querySelectorAll<HTMLElement>('.DraftEditor-root')
-      applyMagicEach(editorRootElems)
+      elem.querySelectorAll<HTMLElement>('.DraftEditor-root').forEach(applyMagic)
     }
     for (const elem of getRemovedElementsFromMutations(mutations)) {
       // textarea가 사라지면 event를 정리한다
@@ -283,8 +274,8 @@ function main() {
     characterData: true,
     childList: true,
   })
-  applyMagicEach(document.querySelectorAll('.DraftEditor-root'))
-  observerProgressBarEach(document.querySelectorAll('[role=progressbar]'))
+  document.querySelectorAll<HTMLElement>('.DraftEditor-root').forEach(applyMagic)
+  document.querySelectorAll<HTMLElement>('[role=progressbar]').forEach(observeProgressBar)
   const colorThemeTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   if (colorThemeTag instanceof HTMLMetaElement) {
     toggleNightMode(colorThemeTag)
