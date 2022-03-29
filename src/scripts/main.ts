@@ -6,6 +6,7 @@ const sendingEventMap = new WeakMap<HTMLElement, EventHandler>()
 const textareaToKomposerMap = new WeakMap<HTMLTextAreaElement, Komposer>()
 const textareaToSuggesterMap = new WeakMap<HTMLTextAreaElement, KomposerSuggester>()
 const emojiClickEventListening = new WeakSet<HTMLElement>()
+const dmSendButtonEventListening = new WeakSet<HTMLElement>()
 
 const suggestArea = document.createElement('div')
 suggestArea.className = 'komposer-suggest-area'
@@ -100,6 +101,40 @@ function integrateEmojiPicker() {
       emojiPicker.addEventListener('click', onEmojiButtonClicked)
     }
   }
+}
+
+function onDMSendButtonClicked(event: MouseEvent) {
+  const { target } = event
+  // 비행기모양 아이콘일 수도 있으며,
+  // 이 경우 event.target은 SVGElement이다.
+  if (!(target instanceof Element)) {
+    return
+  }
+  const sendButton = target.closest('[data-testid=dmComposerSendButton]')!
+  const disabled = sendButton.getAttribute('aria-disabled') === 'true'
+  if (disabled) {
+    return
+  }
+  const dmTextArea = findActiveTextareas().find(
+    te => te.getAttribute('data-komposer-type') === 'DM',
+  )!
+  const dmKomposer = textareaToKomposerMap.get(dmTextArea)!
+  setTimeout(() => {
+    dmKomposer.updateText('')
+  }, 100)
+}
+
+function interceptDMSendButton() {
+  const sendButton = document.querySelector<HTMLElement>('[data-testid=dmComposerSendButton]')
+  if (!sendButton) {
+    return
+  }
+  if (dmSendButtonEventListening.has(sendButton)) {
+    return
+  }
+  dmSendButtonEventListening.add(sendButton)
+  sendButton.removeEventListener('click', onDMSendButtonClicked)
+  sendButton.addEventListener('click', onDMSendButtonClicked)
 }
 
 function onEmojiButtonClicked(event: MouseEvent) {
@@ -242,6 +277,7 @@ function main() {
       }
     }
     integrateEmojiPicker()
+    interceptDMSendButton()
   }).observe(document.body, {
     subtree: true,
     characterData: true,

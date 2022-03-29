@@ -35,6 +35,7 @@ export default class Komposer {
     } else {
       this._type = 'Tweet'
     }
+    this.textarea.setAttribute('data-komposer-type', this._type)
     this.draftjsEditor = editor
     this.draftjsEditorState = editorState
     this.initializeTextarea()
