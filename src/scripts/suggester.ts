@@ -32,10 +32,13 @@ export default class KomposerSuggester {
     return this.items.length > 0
   }
   public connect() {
-    const debouncedSuggest = debounce(textarea => this.suggest(textarea), 500)
+    const debouncedSuggest = debounce(
+      (textarea: HTMLTextAreaElement) => this.suggest(textarea),
+      500,
+    )
     // 화살표키를 한 번 눌렀는데도 커서가 두 번 이동하는 경우가 있더라.
     // debounce 걸어서 막음
-    const debouncedMoveCursor = throttle(direction => this.moveCursor(direction), 100, {
+    const debouncedMoveCursor = throttle((direction: number) => this.moveCursor(direction), 100, {
       leading: true,
       trailing: false,
     })
