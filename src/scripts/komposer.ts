@@ -28,13 +28,14 @@ export default class Komposer {
       '.DraftEditor-editorContainer > div[contenteditable=true]',
     )!
     const { editor, editorState } = getReactEventHandler(this.editorContentElem).children[0].props
-    if (this.editorContentElem.getAttribute('data-testid') === 'dmComposerTextInput') {
+    if (this.editorContentElem.dataset.testid === 'dmComposerTextInput') {
       this._type = 'DM'
     } else if (editorRootElem.matches('[role=search] .DraftEditor-root')) {
       this._type = 'Search'
     } else {
       this._type = 'Tweet'
     }
+    this.textarea.dataset.komposerType = this._type
     this.draftjsEditor = editor
     this.draftjsEditorState = editorState
     this.initializeTextarea()
@@ -258,31 +259,31 @@ export default class Komposer {
     return sendTweetFn()
   }
   private sendDM() {
-    const sendDMButton = document.querySelector('[data-testid="dmComposerSendButton"]')
+    const sendDMButton = document.querySelector('[data-testid=dmComposerSendButton]')
     if (!(sendDMButton instanceof HTMLElement)) {
-      throw new TypeError('dmComposerSendButton is missing')
+      throw new Error('dmComposerSendButton is missing')
     }
     const disabled = sendDMButton.getAttribute('aria-disabled') === 'true'
     if (disabled) {
       return
     }
     sendDMButton.click()
+    this.clearDM()
+  }
+  private submitSearch() {
+    const form = this.textarea.closest('form')!
+    form.requestSubmit()
+  }
+  public clearDM() {
     // updateText를 곧바로 하면 DM전송 실패하더라.
     // setTimeout으로 약간의 딜레이를 준다. (1은 너무 짧다..)
     // 이 때, 딜레이 도중 텍스트 수정을 막기 위해 임시로 readOnly를 걸어둔다.
     this.textarea.readOnly = true
     setTimeout(() => {
-      try {
-        this.updateText('')
-        this.fitTextareaHeight()
-      } finally {
-        this.textarea.readOnly = false
-        this.textarea.focus()
-      }
+      this.updateText('')
+      this.fitTextareaHeight()
+      this.textarea.readOnly = false
+      this.textarea.focus()
     }, 250)
-  }
-  private submitSearch() {
-    const form = this.textarea.closest('form')!
-    form.requestSubmit()
   }
 }
