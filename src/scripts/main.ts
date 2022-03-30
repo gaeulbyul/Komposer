@@ -115,9 +115,9 @@ function onDMSendButtonClicked(event: MouseEvent) {
   if (disabled) {
     return
   }
-  const dmTextArea = findActiveTextareas().find(
-    te => te.dataset.komposerType === 'DM',
-  )!
+  const container = sendButton.closest('aside[role=complementary]')!
+  const dmTextArea = container
+    .querySelector<HTMLTextAreaElement>('textarea.komposer[data-komposer-type=DM]')!
   const dmKomposer = textareaToKomposerMap.get(dmTextArea)!
   dmKomposer.clearDM()
 }
