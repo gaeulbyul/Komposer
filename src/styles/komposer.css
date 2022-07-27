@@ -41,7 +41,14 @@ textarea.komposer {
   outline: 0;
   resize: none;
   font-size: inherit;
-  font-family: 'Twemoji', sans-serif;
+  font-family: TwitterChirp,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   background-color: inherit;
   color: inherit;
 }
