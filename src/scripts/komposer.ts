@@ -249,12 +249,9 @@ export default class Komposer {
     }
   }
   private sendTweet() {
-    const grandParentOfEditorRoot = this.editorRootElem.parentElement?.parentElement!
-    const grandProps = getReactEventHandler(grandParentOfEditorRoot)?.children?.props
-    if (!grandProps) {
-      throw new Error('fail to get grandProps')
-    }
-    const { sendTweetCommandName, keyCommandHandlers } = grandProps
+    const draftJsStyles = this.editorRootElem.closest('div[class*=draftjs-styles_]')!
+    const { props } = getReactEventHandler(draftJsStyles.parentElement!).children
+    const { sendTweetCommandName, keyCommandHandlers } = props
     const sendTweetFn = keyCommandHandlers[sendTweetCommandName]
     return sendTweetFn()
   }
