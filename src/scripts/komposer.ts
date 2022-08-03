@@ -97,7 +97,7 @@ export default class Komposer {
     // return this._draftjsEditor.props.editorState.getCurrentContent().getPlainText()
   }
   private updateDraftEditorText(text: string) {
-    const { draftjsEditorState: draftjsEditorState } = this
+    const { draftjsEditorState } = this
     const conts = draftjsEditorState.getCurrentContent().constructor.createFromText(text)
     const edits = draftjsEditorState.constructor.createWithContent(conts)
     this.draftjsEditor.update(edits)
