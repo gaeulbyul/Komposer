@@ -1,6 +1,11 @@
+## v0.8.0.9
+
+- 트윗 전송기능 고침
+- 파이어폭스에서 placeholder 색상이 다른 브라우저보다 옅게 나타나는 문제 고침
+
 ## v0.8.0.8
 
-- 트위터의 원래 입력칸과 같은 글꼴을 쓰도록 함 (Contributed by @Hazealign, Thank you!)
+- 트위터의 원래 입력칸과 같은 글꼴을 쓰도록 함 (Contributed by [Hazealign](https://github.com/Hazealign), Thank you!)
 
 ## v0.8.0.7
 
