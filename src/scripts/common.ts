@@ -1,7 +1,7 @@
 export const EVENT_SENDING = 'Komposer::SENDING'
 export const EVENT_ACCEPT_SUGGEST = 'Komposer::ACCEPT_SUGGEST'
 
-export function assign<T>(obj: T, anotherObj: Partial<T>): void {
+export function assign<T extends object>(obj: T, anotherObj: Partial<T>): void {
   Object.assign(obj, anotherObj)
 }
 

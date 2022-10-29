@@ -18,8 +18,8 @@ task('check-tsc', async () => {
   await exec('tsc --noEmit')
 })
 
-task('webpack', async () => {
-  await exec('webpack-cli --mode=production')
+task('esbuild', async () => {
+  await exec('yarn node ./esbuild.config.js')
 })
 
 task('copy-assets', async () => {
@@ -55,7 +55,7 @@ task('srczip', async () => {
   await exec(`git archive -9 -v -o ./dist/${name}-v${version}.Source.zip HEAD`)
 })
 
-task('build', parallel('copy-assets', 'webpack'))
+task('build', parallel('copy-assets', 'esbuild'))
 task('default', series('clean', 'build'))
 task('dist', parallel('zip', 'srczip'))
 task('all', series('default', 'dist'))
