@@ -115,6 +115,7 @@ function onDMSendButtonClicked(event: MouseEvent) {
   if (disabled) {
     return
   }
+  // DM을 입력하고나서 마우스로 전송버튼을 눌러서 보내면 입력한 내용은 여기서 지워준다.
   const container = sendButton.closest('aside[role=complementary]')!
   const dmTextArea = container
     .querySelector<HTMLTextAreaElement>('textarea.komposer[data-komposer-type=DM]')!
