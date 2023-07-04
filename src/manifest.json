@@ -12,27 +12,23 @@
   },
 
   "permissions": [
-    "https://twitter.com/*",
-    "https://mobile.twitter.com/*",
-    "https://tweetdeck.twitter.com/*"
+    "https://twitter.com/*"
   ],
 
   "content_scripts": [
     {
       "matches": [
-        "https://twitter.com/*",
-        "https://mobile.twitter.com/*",
-        "https://tweetdeck.twitter.com/*"
+        "https://twitter.com/*"
       ],
       "exclude_matches": [
-        "https://*.twitter.com/about",
-        "https://*.twitter.com/download",
-        "https://*.twitter.com/privacy",
-        "https://*.twitter.com/tos",
-        "https://*.twitter.com/*/privacy",
-        "https://*.twitter.com/*/tos",
-        "https://*.twitter.com/i/release_notes",
-        "https://*.twitter.com/i/tweetdeck_release_notes"
+        "https://twitter.com/about",
+        "https://twitter.com/download",
+        "https://twitter.com/privacy",
+        "https://twitter.com/tos",
+        "https://twitter.com/*/privacy",
+        "https://twitter.com/*/tos",
+        "https://twitter.com/i/release_notes",
+        "https://twitter.com/i/tweetdeck_release_notes"
       ],
       "css": ["styles/komposer.css"],
       "js": ["scripts/loader.js"]
