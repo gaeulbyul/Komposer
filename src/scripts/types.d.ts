@@ -1,5 +1,5 @@
-declare type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak' | 'Submit' | 'Ignore'
-declare type KomposerType = 'Tweet' | 'DM' | 'Search'
+declare type HowToHandleEnterKey = 'SendTweet' | 'SendDM' | 'LineBreak' | 'Ignore'
+declare type KomposerType = 'Tweet' | 'DM'
 
 declare type EventHandler = (event: Event) => void
 declare type Indices = [number, number]

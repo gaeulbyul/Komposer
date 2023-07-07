@@ -30,8 +30,6 @@ export default class Komposer {
     const { editor, editorState } = getReactEventHandler(this.editorContentElem).children[0].props
     if (this.editorContentElem.dataset.testid === 'dmComposerTextInput') {
       this._type = 'DM'
-    } else if (editorRootElem.matches('[role=search] .DraftEditor-root')) {
-      this._type = 'Search'
     } else {
       this._type = 'Tweet'
     }
@@ -54,18 +52,10 @@ export default class Komposer {
     if (!(parentOfEditorRoot instanceof HTMLElement)) {
       throw new TypeError('parentOfEditorRoot is missing?')
     }
-    let lookingGlassIcon = null
-    if (this.type === 'Search') {
-      lookingGlassIcon = editorRootElem.closest('label')?.children[0]
-    }
     parentOfEditorRoot.hidden = true
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
     grandParentOfEditorRoot.prepend(this.textareaContainer)
     this.fitTextareaHeight()
-    if (lookingGlassIcon) {
-      const label = editorRootElem.closest('label')
-      label?.prepend(lookingGlassIcon)
-    }
     if (editorRootElem.contains(document.activeElement)) {
       if (this.type === 'DM') {
         this.updateText('')
@@ -134,9 +124,6 @@ export default class Komposer {
             break
           case 'SendTweet':
             this.sendTweet()
-            break
-          case 'Submit':
-            this.submitSearch()
             break
           case 'Ignore':
             break
@@ -244,8 +231,6 @@ export default class Komposer {
         } else {
           return 'LineBreak'
         }
-      case 'Search':
-        return 'Submit'
     }
   }
   private sendTweet() {
@@ -267,10 +252,6 @@ export default class Komposer {
     sendDMButton.click()
     // 입력했던 내용은 main의 onDMSendButtonClicked 함수에서
     // 비워준다.
-  }
-  private submitSearch() {
-    const form = this.textarea.closest('form')!
-    form.requestSubmit()
   }
   public clearDM() {
     // updateText를 곧바로 하면 DM전송 실패하더라.
