@@ -52,6 +52,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sane-fmt/wasm32-wasi@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "@sane-fmt/wasm32-wasi@npm:0.17.0"
+  dependencies:
+    "@types/node": ^16.0.0
+    "@wasmer/wasi": ^0.12.0
+    tslib: ^2.0.0
+  bin:
+    sane-fmt: bin
+    sane-fmt-wasi: bin
+    sane-fmt-wasm32-wasi: bin
+  checksum: 8118f4bf1e9d0108239f17d3cd7c4e2731256af4b776076638bdf4184a41c62bbd77918269f200a97e373278c40e2797027ec05bf5478b30ff48f5a5871b72aa
+  languageName: node
+  linkType: hard
+
 "@types/lodash-es@npm:^4.17.4":
   version: 4.17.4
   resolution: "@types/lodash-es@npm:4.17.4"
@@ -82,10 +97,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^16.0.0":
+  version: 16.18.38
+  resolution: "@types/node@npm:16.18.38"
+  checksum: a3baa141e49ce94486f083eea1240cf38479a73ba663e1bf3f52f85b466125821b6e3ea85ded38fde3901530aca4601291395a50eefcea533a4f3b45171bda28
+  languageName: node
+  linkType: hard
+
 "@types/twitter-text@npm:^3.1.1":
   version: 3.1.1
   resolution: "@types/twitter-text@npm:3.1.1"
   checksum: c29f9bc8302c5a0c00b167e844bb1f76f89751791f55793ba9887757771efbbed7abbdefea3923f7e96d82537bc5114ea8cece53b8374b62778a15e325059254
+  languageName: node
+  linkType: hard
+
+"@wasmer/wasi@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "@wasmer/wasi@npm:0.12.0"
+  dependencies:
+    browser-process-hrtime: ^1.0.0
+    buffer-es6: ^4.9.3
+    path-browserify: ^1.0.0
+    randomfill: ^1.0.4
+  checksum: d380525bd217efc9feb80ac077a5c34de1713a63501d0c6500bcf5f440a0decaea7bd78def7a71f7b4a5603e9a24c92f2f17ebcb5cb1fbb96bfaa2a9700e538a
   languageName: node
   linkType: hard
 
@@ -292,10 +326,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"browser-process-hrtime@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "browser-process-hrtime@npm:1.0.0"
+  checksum: e30f868cdb770b1201afb714ad1575dd86366b6e861900884665fb627109b3cc757c40067d3bfee1ff2a29c835257ea30725a8018a9afd02ac1c24b408b1e45f
+  languageName: node
+  linkType: hard
+
 "buffer-crc32@npm:~0.2.3":
   version: 0.2.13
   resolution: "buffer-crc32@npm:0.2.13"
   checksum: 06252347ae6daca3453b94e4b2f1d3754a3b146a111d81c68924c22d91889a40623264e95e67955b1cb4a68cbedf317abeabb5140a9766ed248973096db5ce1c
+  languageName: node
+  linkType: hard
+
+"buffer-es6@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "buffer-es6@npm:4.9.3"
+  checksum: dfc8ebb3c5c00166e6f81e6ec7ea876693ea6197a8d0b07b1a17482ffab0e5d3307bfb539f84862b1ae35cd70ad03835db0f3c7dc4e337cbd16c50bb4c7e5df7
   languageName: node
   linkType: hard
 
@@ -1445,6 +1493,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "komposer@workspace:."
   dependencies:
+    "@sane-fmt/wasm32-wasi": ^0.17.0
     "@types/lodash-es": ^4.17.4
     "@types/twitter-text": ^3.1.1
     dprint: ^0.32.2
@@ -1939,6 +1988,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"path-browserify@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "path-browserify@npm:1.0.1"
+  checksum: c6d7fa376423fe35b95b2d67990060c3ee304fc815ff0a2dc1c6c3cfaff2bd0d572ee67e18f19d0ea3bbe32e8add2a05021132ac40509416459fffee35200699
+  languageName: node
+  linkType: hard
+
 "path-exists@npm:^3.0.0":
   version: 3.0.0
   resolution: "path-exists@npm:3.0.0"
@@ -2043,6 +2099,25 @@ __metadata:
   version: 1.4.1
   resolution: "punycode@npm:1.4.1"
   checksum: fa6e698cb53db45e4628559e557ddaf554103d2a96a1d62892c8f4032cd3bc8871796cae9eabc1bc700e2b6677611521ce5bb1d9a27700086039965d0cf34518
+  languageName: node
+  linkType: hard
+
+"randombytes@npm:^2.0.5":
+  version: 2.1.0
+  resolution: "randombytes@npm:2.1.0"
+  dependencies:
+    safe-buffer: ^5.1.0
+  checksum: d779499376bd4cbb435ef3ab9a957006c8682f343f14089ed5f27764e4645114196e75b7f6abf1cbd84fd247c0cb0651698444df8c9bf30e62120fbbc52269d6
+  languageName: node
+  linkType: hard
+
+"randomfill@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "randomfill@npm:1.0.4"
+  dependencies:
+    randombytes: ^2.0.5
+    safe-buffer: ^5.1.0
+  checksum: 33734bb578a868d29ee1b8555e21a36711db084065d94e019a6d03caa67debef8d6a1bfd06a2b597e32901ddc761ab483a85393f0d9a75838f1912461d4dbfc7
   languageName: node
   linkType: hard
 
@@ -2156,7 +2231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:^5.1.1, safe-buffer@npm:^5.1.2":
+"safe-buffer@npm:^5.1.0, safe-buffer@npm:^5.1.1, safe-buffer@npm:^5.1.2":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: b99c4b41fdd67a6aaf280fcd05e9ffb0813654894223afb78a31f14a19ad220bba8aba1cb14eddce1fcfb037155fe6de4e861784eb434f7d11ed58d1e70dd491
@@ -2418,6 +2493,13 @@ __metadata:
   version: 0.3.0
   resolution: "timsort@npm:0.3.0"
   checksum: 1a66cb897dacabd7dd7c91b7e2301498ca9e224de2edb9e42d19f5b17c4b6dc62a8d4cbc64f28be82aaf1541cb5a78ab49aa818f42a2989ebe049a64af731e2a
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.0.0":
+  version: 2.6.0
+  resolution: "tslib@npm:2.6.0"
+  checksum: c01066038f950016a18106ddeca4649b4d76caa76ec5a31e2a26e10586a59fceb4ee45e96719bf6c715648e7c14085a81fee5c62f7e9ebee68e77a5396e5538f
   languageName: node
   linkType: hard
 

@@ -131,8 +131,8 @@ export default class KomposerSuggester {
             top: item.offsetTop,
           })
         }
-        const overflowedOnBottom = this.suggestArea.scrollTop + this.suggestArea.clientHeight
-          < item.offsetTop + item.offsetHeight
+        const overflowedOnBottom = this.suggestArea.scrollTop + this.suggestArea.clientHeight <
+          item.offsetTop + item.offsetHeight
         if (overflowedOnBottom) {
           this.suggestArea.scrollTo({
             behavior: 'smooth',
@@ -306,8 +306,8 @@ export default class KomposerSuggester {
   private render() {
     this.suggestArea.innerHTML = ''
     const { activeElement } = document
-    const shouldShow = activeElement && this.komposer.textarea.isSameNode(activeElement)
-      && this.hasSuggestItems()
+    const shouldShow = activeElement && this.komposer.textarea.isSameNode(activeElement) &&
+      this.hasSuggestItems()
     if (shouldShow) {
       this.suggestArea.style.display = 'block'
       for (const item of this.items) {
