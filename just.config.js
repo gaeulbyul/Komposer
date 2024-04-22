@@ -7,6 +7,9 @@ const ncp = require('ncp')
 const fs = require('fs-extra')
 
 const manifest = require('./src/manifest.json')
+const esbuild = require('esbuild')
+const buildConfig = require('./esbuild.config.js')
+
 const name = manifest.name.replace(/[^\w\-]+/gi, '')
 const version = manifest.version
 
@@ -18,8 +21,36 @@ task('check-tsc', async () => {
   await exec('tsc --noEmit')
 })
 
-task('esbuild', async () => {
-  await exec('yarn node ./esbuild.config.js')
+task('bundle-js', async () => {
+  await esbuild.build(buildConfig.mv3)
+  await esbuild.build(buildConfig.mv2)
+})
+
+task('esbuild-watch', async () => {
+  const logger = prefix => [{
+    name: 'log-on-build',
+    setup(build) {
+      build.onEnd(result =>
+        void console.log(
+          '<%s> build ended at: %s, with: %d Errors, %d Warnings',
+          prefix,
+          new Date().toLocaleTimeString(),
+          result.errors.length,
+          result.warnings.length,
+        )
+      )
+    },
+  }]
+  const ctx2 = await esbuild.context({
+    ...buildConfig.mv2,
+    plugins: logger('mv2'),
+  })
+  const ctx3 = await esbuild.context({
+    ...buildConfig.mv3,
+    plugins: logger('mv3'),
+  })
+  await Promise.all([ctx2.watch(), ctx3.watch()])
+  logger.info('esbuild: watching...')
 })
 
 task('copy-assets', async () => {
@@ -55,7 +86,7 @@ task('srczip', async () => {
   await exec(`git archive -9 -v -o ./dist/${name}-v${version}.Source.zip HEAD`)
 })
 
-task('build', parallel('copy-assets', 'esbuild'))
+task('build', parallel('copy-assets', 'bundle-js'))
 task('default', series('clean', 'build'))
 task('dist', parallel('zip', 'srczip'))
 task('all', series('default', 'dist'))

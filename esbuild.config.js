@@ -3,57 +3,35 @@ const esbuild = require('esbuild')
 
 const dev = /^dev/i.test(process.env.NODE_ENV)
 
-const watchOptions = {
-  onRebuild(error, result) {
-    if (error) {
-      console.error('<esbuild> error: ', error)
-    } else {
-      const { errors, warnings } = result
-      console.log('<esbuild> ok: ', { errors, warnings })
-    }
-  },
-}
-
-const watch = dev ? watchOptions : null
-
 const base = {
   entryPoints: {
     komposer: './src/scripts/main.ts',
   },
   outExtension: { '.js': '.bun.js' },
-  // outdir: './build/bundled',
   bundle: true,
-  target: [
-    'es2022',
-    'chrome100',
-    'firefox91',
-    'edge100',
-  ],
-  watch,
+  target: ['esnext'],
   minifyWhitespace: !dev,
   minifyIdentifiers: !dev,
   minifySyntax: !dev,
   sourcemap: true,
 }
 
+const mv2 = { ...base, outdir: './build/bundled' }
+const mv3 = { ...base, outdir: './build-v3/bundled' }
+
+module.exports = { mv2, mv3 }
+
 async function main() {
-  if (watch) {
-    console.log('<esbuild> watching...')
-  } else {
-    console.log('<esbuild> building...')
-  }
-  const mv2 = esbuild.build({
-    ...base,
-    outdir: './build/bundled',
-  })
-  const mv3 = esbuild.build({
-    ...base,
-    outdir: './build-v3/bundled',
-  })
-  await Promise.all([mv2, mv3])
-  if (!watch) {
-    console.log('<esbuild> DONE')
-  }
+  await Promise.all([
+    esbuild.build(mv2).then(result => {
+      console.log('<esbuild> mv2 build')
+    }),
+    esbuild.build(mv3).then(result => {
+      console.log('<esbuild> mv3 build')
+    }),
+  ])
 }
 
-main()
+if (require.main == module) {
+  main()
+}

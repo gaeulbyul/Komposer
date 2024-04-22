@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn sane-fmt -w src/ && yarn tsc --noEmit
+bunx sane-fmt -w src/ && bunx tsc --noEmit
