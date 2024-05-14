@@ -22,18 +22,16 @@ task('check-tsc', async () => {
 })
 
 task('bundle-js', async () => {
-  await esbuild.build(buildConfig.mv3)
-  await esbuild.build(buildConfig.mv2)
+  await esbuild.build(buildConfig)
 })
 
 task('esbuild-watch', async () => {
-  const prefixedLogger = prefix => [{
+  const watchLogger = () => [{
     name: 'log-on-build',
     setup(build) {
       build.onEnd(result =>
         void console.log(
-          '<%s> build ended at: %s, with: %d Errors, %d Warnings',
-          prefix,
+          'build ended at: %s, with: %d Errors, %d Warnings',
           new Date().toLocaleTimeString(),
           result.errors.length,
           result.warnings.length,
@@ -41,16 +39,12 @@ task('esbuild-watch', async () => {
       )
     },
   }]
-  const ctx2 = await esbuild.context({
-    ...buildConfig.mv2,
-    plugins: prefixedLogger('mv2'),
+  const ctx = await esbuild.context({
+    ...buildConfig,
+    plugins: watchLogger(),
   })
-  const ctx3 = await esbuild.context({
-    ...buildConfig.mv3,
-    plugins: prefixedLogger('mv3'),
-  })
-  await Promise.all([ctx2.watch(), ctx3.watch()])
   logger.info('esbuild: watching...')
+  await ctx.watch()
 })
 
 task('copy-assets', async () => {
@@ -60,24 +54,19 @@ task('copy-assets', async () => {
       return !/\.tsx?$/.test(filename)
     },
   }
-  await Promise.all([cp('src/', 'build/', copyOptions), cp('src/', 'build-v3/', copyOptions)])
-  await fs.move('build-v3/manifest-v3.json', 'build-v3/manifest.json', {
-    overwrite: true,
-  })
+  await cp('src/', 'build/', copyOptions)
 })
 
 task('clean', async () => {
-  await Promise.all([rmrf('build/'), rmrf('build-v3/')])
+  await rmrf('build/')
 })
 
 task('zip', async () => {
   const filename = `${name}-v${version}.zip`
-  const filenamev3 = `${name}-v${version} [MV3].zip`
-  logger.info(`zipping into "${filename}" / "${filenamev3}"...`)
+  logger.info(`zipping into "${filename}"...`)
   await mkdirp('dist/')
   await Promise.all([
     exec(`7z a -r "dist/${filename}" build/.`),
-    exec(`7z a -r "dist/${filenamev3}" build-v3/.`),
   ])
 })
 

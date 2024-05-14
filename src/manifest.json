@@ -1,9 +1,10 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Komposer",
   "description": "트윗입력 도중 한글이 짤리지 않게 합니다.",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
   "version": "0.8.0.10",
+  "version_name": "0.8.0.10 [MV3]",
   "homepage_url": "https://github.com/gaeulbyul/Komposer",
   "icons": {
     "48": "icons/icon-48.png",
@@ -11,7 +12,7 @@
     "128": "icons/icon-128.png"
   },
 
-  "permissions": [
+  "host_permissions": [
     "https://twitter.com/*"
   ],
 
@@ -30,10 +31,18 @@
         "https://twitter.com/i/release_notes",
         "https://twitter.com/i/tweetdeck_release_notes"
       ],
+      "run_at": "document_end",
       "css": ["styles/komposer.css"],
       "js": ["scripts/loader.js"]
     }
   ],
 
-  "web_accessible_resources": ["bundled/komposer.bun.js"]
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://twitter.com/*"
+      ],
+      "resources": ["bundled/komposer.bun.js"]
+    }
+  ]
 }

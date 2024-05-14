@@ -3,10 +3,11 @@ const esbuild = require('esbuild')
 
 const dev = /^dev/i.test(process.env.NODE_ENV)
 
-const base = {
+const buildConfig = {
   entryPoints: {
     komposer: './src/scripts/main.ts',
   },
+  outdir: './build/bundled',
   outExtension: { '.js': '.bun.js' },
   bundle: true,
   target: ['esnext'],
@@ -16,21 +17,13 @@ const base = {
   sourcemap: true,
 }
 
-const mv2 = { ...base, outdir: './build/bundled' }
-const mv3 = { ...base, outdir: './build-v3/bundled' }
-
-module.exports = { mv2, mv3 }
-
 async function main() {
-  await Promise.all([
-    esbuild.build(mv2).then(result => {
-      console.log('<esbuild> mv2 build')
-    }),
-    esbuild.build(mv3).then(result => {
-      console.log('<esbuild> mv3 build')
-    }),
-  ])
+  esbuild.build(buildConfig).then(result => {
+    console.log('<esbuild> build')
+  })
 }
+
+module.exports = buildConfig
 
 if (require.main == module) {
   main()
