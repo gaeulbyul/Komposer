@@ -11,6 +11,12 @@
     "128": "icons/icon-128.png"
   },
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{c56d6d3f-78d2-4c31-84c6-18628be336c2}"
+    }
+  },
+
   "host_permissions": ["https://twitter.com/*", "https://x.com/*"],
 
   "content_scripts": [
