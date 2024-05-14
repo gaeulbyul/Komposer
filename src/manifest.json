@@ -4,7 +4,6 @@
   "description": "트윗입력 도중 한글이 짤리지 않게 합니다.",
   "author": "Gaeulbyul <aeiou256@gmail.com>",
   "version": "0.8.0.10",
-  "version_name": "0.8.0.10 [MV3]",
   "homepage_url": "https://github.com/gaeulbyul/Komposer",
   "icons": {
     "48": "icons/icon-48.png",
@@ -12,15 +11,11 @@
     "128": "icons/icon-128.png"
   },
 
-  "host_permissions": [
-    "https://twitter.com/*"
-  ],
+  "host_permissions": ["https://twitter.com/*", "https://x.com/*"],
 
   "content_scripts": [
     {
-      "matches": [
-        "https://twitter.com/*"
-      ],
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
       "exclude_matches": [
         "https://twitter.com/about",
         "https://twitter.com/download",
@@ -39,9 +34,7 @@
 
   "web_accessible_resources": [
     {
-      "matches": [
-        "https://twitter.com/*"
-      ],
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
       "resources": ["bundled/komposer.bun.js"]
     }
   ]
