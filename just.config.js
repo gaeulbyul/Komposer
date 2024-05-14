@@ -27,7 +27,7 @@ task('bundle-js', async () => {
 })
 
 task('esbuild-watch', async () => {
-  const logger = prefix => [{
+  const prefixedLogger = prefix => [{
     name: 'log-on-build',
     setup(build) {
       build.onEnd(result =>
@@ -43,11 +43,11 @@ task('esbuild-watch', async () => {
   }]
   const ctx2 = await esbuild.context({
     ...buildConfig.mv2,
-    plugins: logger('mv2'),
+    plugins: prefixedLogger('mv2'),
   })
   const ctx3 = await esbuild.context({
     ...buildConfig.mv3,
-    plugins: logger('mv3'),
+    plugins: prefixedLogger('mv3'),
   })
   await Promise.all([ctx2.watch(), ctx3.watch()])
   logger.info('esbuild: watching...')

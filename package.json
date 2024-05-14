@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "@sane-fmt/wasm32-wasi": "^0.18.1",
-    "@types/bun": "^1.1.0",
     "@types/lodash-es": "^4.17.4",
     "@types/twitter-text": "^3.1.1",
     "esbuild": "^0.20.2",
