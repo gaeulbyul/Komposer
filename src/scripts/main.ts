@@ -296,9 +296,13 @@ function main() {
   }
 }
 
+function isReactLoaded(elem: HTMLElement) {
+  return Object.keys(elem).find(k => k.startsWith('_reactListening'))
+}
+
 function initialize() {
   const reactRoot = document.getElementById('react-root')
-  if (reactRoot && '_reactRootContainer' in reactRoot) {
+  if (reactRoot && isReactLoaded(reactRoot)) {
     main()
   } else {
     setTimeout(initialize, 500)
