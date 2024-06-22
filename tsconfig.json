@@ -24,6 +24,7 @@
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "typeRoots": ["node_modules/@types", "src/scripts/types"]
   }
 }
