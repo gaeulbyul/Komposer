@@ -55,7 +55,6 @@ export default class Komposer {
     parentOfEditorRoot.hidden = true
     const grandParentOfEditorRoot = parentOfEditorRoot.parentElement!
     grandParentOfEditorRoot.prepend(this.textareaContainer)
-    this.fitTextareaHeight()
     if (editorRootElem.contains(document.activeElement)) {
       if (this.type === 'DM') {
         this.updateText('')
@@ -68,6 +67,7 @@ export default class Komposer {
         this.textarea.focus()
       }, 250)
     }
+    this.fitTextareaHeight()
   }
   public updateText(text: string) {
     this.updateDraftEditorText(text)
