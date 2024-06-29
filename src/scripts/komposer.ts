@@ -265,11 +265,6 @@ export default class Komposer {
       this.fitTextareaHeight()
       this.textarea.readOnly = false
       this.textarea.focus()
-      // 2022-12-05: Chromium에서 포커스 안 잡히는 문제 조치
-      setTimeout(() => {
-        this.textarea.blur()
-        this.textarea.focus()
-      }, 200)
     }, 200)
   }
 }
