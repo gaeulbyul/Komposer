@@ -118,16 +118,18 @@ export default class Komposer {
         if (how !== 'LineBreak') {
           event.preventDefault()
         }
-        switch (how) {
-          case 'SendDM':
-            this.sendDM()
-            break
-          case 'SendTweet':
-            this.sendTweet()
-            break
-          case 'Ignore':
-            break
-        }
+        setTimeout(() => {
+          switch (how) {
+            case 'SendDM':
+              this.sendDM()
+              break
+            case 'SendTweet':
+              this.sendTweet()
+              break
+            case 'Ignore':
+              break
+          }
+        })
       }
     })
     textarea.addEventListener('input', () => {
