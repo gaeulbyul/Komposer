@@ -30,7 +30,15 @@
         "https://twitter.com/*/privacy",
         "https://twitter.com/*/tos",
         "https://twitter.com/i/release_notes",
-        "https://twitter.com/i/tweetdeck_release_notes"
+        "https://twitter.com/i/tweetdeck_release_notes",
+        "https://x.com/about",
+        "https://x.com/download",
+        "https://x.com/privacy",
+        "https://x.com/tos",
+        "https://x.com/*/privacy",
+        "https://x.com/*/tos",
+        "https://x.com/i/release_notes",
+        "https://x.com/i/tweetdeck_release_notes"
       ],
       "run_at": "document_end",
       "css": ["styles/komposer.css"],
