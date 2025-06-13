@@ -43,7 +43,7 @@ export default class KomposerSuggester {
       trailing: false,
     })
     const { textarea } = this.komposer
-    textarea.addEventListener(EVENT_ACCEPT_SUGGEST, (event: Event) => {
+    textarea.addEventListener(EVENT_ACCEPT_SUGGEST, event => {
       if (!(event instanceof CustomEvent)) {
         throw new Error('unreachable')
       }
@@ -69,7 +69,7 @@ export default class KomposerSuggester {
     textarea.addEventListener('input', () => {
       debouncedSuggest(textarea)
     })
-    textarea.addEventListener('keydown', (event: KeyboardEvent) => {
+    textarea.addEventListener('keydown', event => {
       const { code } = event
       if (!this.hasSuggestItems()) {
         return
@@ -201,7 +201,7 @@ export default class KomposerSuggester {
     }
     this.render()
   }
-  private createUserItem(user: User): HTMLElement {
+  private createUserItem(user: User) {
     const userName = '@' + user.screen_name
     const item = document.createElement('button')
     assign(item, {
@@ -237,13 +237,13 @@ export default class KomposerSuggester {
       textContent: userName,
       className: 'secondary',
     })
-    item.addEventListener('click', (event: MouseEvent) => {
+    item.addEventListener('click', event => {
       event.preventDefault()
       this.acceptSuggest(userName)
     })
     return item
   }
-  private getHashFlag(hashtag: string): HashFlag | null {
+  private getHashFlag(hashtag: string) {
     const tagWithoutHash = hashtag.replace(/^#/, '').toLowerCase()
     const flags = this.hashflags[tagWithoutHash]
     if (flags) {
@@ -257,7 +257,7 @@ export default class KomposerSuggester {
     }
     return null
   }
-  private createHashtagItem(topic: Topic): HTMLElement {
+  private createHashtagItem(topic: Topic) {
     const item = document.createElement('button')
     const hashtag = topic.topic
     assign(item, {
@@ -278,7 +278,7 @@ export default class KomposerSuggester {
         className: 'hashflag',
       })
     }
-    item.addEventListener('click', (event: MouseEvent) => {
+    item.addEventListener('click', event => {
       event.preventDefault()
       this.acceptSuggest(hashtag)
     })

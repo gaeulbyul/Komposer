@@ -11,7 +11,7 @@ export default class Komposer {
   get type(): KomposerType {
     return this._type
   }
-  get disabled(): boolean {
+  get disabled() {
     return this.textarea.disabled
   }
   set disabled(value: boolean) {
@@ -105,7 +105,7 @@ export default class Komposer {
     const debouncedUpdateDraftEditorText = debounce((text: string) => {
       this.updateDraftEditorText(text)
     }, 100)
-    textarea.addEventListener('keydown', (event: KeyboardEvent) => {
+    textarea.addEventListener('keydown', event => {
       const { code } = event
       // 한글 조합 중 Enter 이벤트가 두 번 발생하는 현상을 막는다.
       // https://www.inflearn.com/questions/9010
@@ -136,7 +136,7 @@ export default class Komposer {
       this.fitTextareaHeight()
       debouncedUpdateDraftEditorText(this.textarea.value)
     })
-    textarea.addEventListener('paste', (event: ClipboardEvent) => {
+    textarea.addEventListener('paste', event => {
       const { clipboardData } = event
       if (!clipboardData) {
         return
@@ -151,11 +151,11 @@ export default class Komposer {
         onPaste(event)
       }
     })
-    textarea.addEventListener('dragover', (event: DragEvent) => {
+    textarea.addEventListener('dragover', event => {
       // 요게 없으면 드롭이 안되더라.
       event.stopPropagation()
     })
-    textarea.addEventListener('drop', (event: DragEvent) => {
+    textarea.addEventListener('drop', event => {
       event.stopPropagation()
       const dropTarget = this.getDropTarget()!
       const onDrop = getReactEventHandler(dropTarget)?.onDrop
