@@ -12,17 +12,17 @@
     "just": "just"
   },
   "devDependencies": {
-    "@sane-fmt/wasm32-wasi": "^0.18.1",
-    "@types/lodash-es": "^4.17.4",
-    "@types/twitter-text": "^3.1.1",
-    "esbuild": "^0.20.2",
-    "fs-extra": "^10.0.0",
-    "husky": "^7.0.4",
+    "@sane-fmt/wasm32-wasi": "0.18.1",
+    "@types/lodash-es": "^4.17.12",
+    "@types/twitter-text": "^3.1.10",
+    "esbuild": "0.25.5",
+    "fs-extra": "10.1.0",
+    "husky": "7.0.4",
     "just-scripts": "0.43.0",
     "mkdirp": "1.0.4",
     "ncp": "2.0.0",
     "rimraf": "3.0.2",
-    "typescript": "^5.4.5"
+    "typescript": "5.8.3"
   },
   "dependencies": {
     "lodash-es": "^4.17.21",
