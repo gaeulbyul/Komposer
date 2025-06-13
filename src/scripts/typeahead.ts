@@ -28,7 +28,7 @@ function generateTwitterAPIOptions(): Partial<RequestInit> {
 }
 
 export async function typeaheadHashTags(word: string, text: string): Promise<TypeaheadResult> {
-  const url = new URL('https://api.twitter.com/1.1/search/typeahead.json')
+  const url = new URL('https://x.com/i/api/1.1/search/typeahead.json')
   const fetchOptions = generateTwitterAPIOptions()
   url.searchParams.set('src', 'compose')
   url.searchParams.set('result_type', 'topics')
@@ -41,7 +41,7 @@ export async function typeaheadHashTags(word: string, text: string): Promise<Typ
 }
 
 export async function typeaheadUserNames(word: string, text: string): Promise<TypeaheadResult> {
-  const url = new URL('https://api.twitter.com/1.1/search/typeahead.json')
+  const url = new URL('https://x.com/i/api/1.1/search/typeahead.json')
   const fetchOptions = generateTwitterAPIOptions()
   url.searchParams.set('src', 'compose')
   url.searchParams.set('result_type', 'users')
