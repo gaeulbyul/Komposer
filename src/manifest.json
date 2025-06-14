@@ -38,7 +38,8 @@
         "https://x.com/*/privacy",
         "https://x.com/*/tos",
         "https://x.com/i/release_notes",
-        "https://x.com/i/tweetdeck_release_notes"
+        "https://x.com/i/tweetdeck_release_notes",
+        "https://x.com/old/*"
       ],
       "run_at": "document_end",
       "css": ["styles/komposer.css"],

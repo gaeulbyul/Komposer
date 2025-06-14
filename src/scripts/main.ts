@@ -303,10 +303,14 @@ function isReactLoaded(elem: HTMLElement) {
 function initialize() {
   const reactRoot = document.getElementById('react-root')
   if (reactRoot && isReactLoaded(reactRoot)) {
-    main()
-  } else {
-    setTimeout(initialize, 500)
+    return main()
   }
+  // OldTwitter 확장기능이 작동중이면 Komposer의 로드를 중단한다.
+  const oldTwitterLink = document.querySelector('#fake-react-root a[href="https://github.com/dimdenGD/OldTwitter"]')
+  if (oldTwitterLink) {
+    return
+  }
+  setTimeout(initialize, 500)
 }
 
 initialize()
