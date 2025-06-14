@@ -12,6 +12,7 @@
     "sourceMap": false,
     "outDir": "build/",
     "rootDir": "src/",
+    "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": "./.cache/tsBuildInfo.dat",
     "strict": true,
@@ -25,6 +26,7 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
     "typeRoots": ["node_modules/@types", "src/scripts/types"]
   }
 }

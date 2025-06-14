@@ -7,6 +7,7 @@ export default class Komposer {
   private readonly draftjsEditorState: any
   private readonly textareaContainer: HTMLElement
   private readonly _type: KomposerType
+  private readonly editorRootElem: HTMLElement
   textarea: HTMLTextAreaElement
   get type(): KomposerType {
     return this._type
@@ -17,7 +18,8 @@ export default class Komposer {
   set disabled(value: boolean) {
     this.textarea.disabled = value
   }
-  public constructor(private readonly editorRootElem: HTMLElement) {
+  public constructor(editorRootElem: HTMLElement) {
+    this.editorRootElem = editorRootElem
     this.textareaContainer = document.createElement('div')
     this.textarea = document.createElement('textarea')
     // (특히 DM에서) 처음 생성될 때 입력칸 높이가 불필요하게 크더라.

@@ -16,16 +16,17 @@ export default class KomposerSuggester {
   private cursor: number
   private currentText: string
   private hashflags: HashFlagsObj
-  public constructor(
-    private readonly komposer: Komposer,
-    private readonly suggestArea: HTMLElement,
-  ) {
+  private readonly komposer: Komposer
+  private readonly suggestArea: HTMLElement
+  public constructor(komposer: Komposer, suggestArea: HTMLElement) {
     this.items = []
     this.indices = [0, 0]
     this.cursor = 0
     this.currentText = ''
     this.hashflags = {}
-    this.suggestArea.className = 'komposer-suggest-area'
+    this.komposer = komposer
+    this.suggestArea = suggestArea
+    suggestArea.className = 'komposer-suggest-area'
     this.loadHashFlagsStore()
   }
   private hasSuggestItems() {
