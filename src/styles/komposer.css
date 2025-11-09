@@ -75,6 +75,7 @@ div[id^='typeaheadDropdownWrapped'] {
   z-index: 999;
   overflow-x: hidden;
   overflow-y: auto;
+  border-radius: 12px;
   background-color: var(--suggest-background);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
