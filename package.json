@@ -15,7 +15,7 @@
     "@sane-fmt/wasm32-wasi": "0.18.1",
     "@types/lodash-es": "^4.17.12",
     "@types/twitter-text": "^3.1.10",
-    "esbuild": "0.25.5",
+    "esbuild": "0.28.1",
     "fs-extra": "10.1.0",
     "husky": "7.0.4",
     "just-scripts": "0.43.0",
