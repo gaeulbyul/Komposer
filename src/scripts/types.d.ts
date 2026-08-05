@@ -45,3 +45,7 @@ declare interface HashFlag {
 declare type HashFlagsObj = {
   [tagName: string]: HashFlag[]
 }
+
+declare module 'twitter-text/dist/esm/extractEntitiesWithIndices' {
+  export default function extractEntitiesWithIndices(text: string): ReturnType<typeof import('twitter-text')['extractEntitiesWithIndices']>
+}

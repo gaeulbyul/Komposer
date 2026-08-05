@@ -1,6 +1,6 @@
 import debounce from 'lodash-es/debounce'
 import throttle from 'lodash-es/throttle'
-import twitterText from 'twitter-text'
+import extractEntitiesWithIndices from 'twitter-text/dist/esm/extractEntitiesWithIndices'
 
 import { PROTECTED_ICON, VERIFIED_BADGE } from './badges'
 import { assign, EVENT_ACCEPT_SUGGEST, getReactEventHandler } from './common'
@@ -162,7 +162,7 @@ export default class KomposerSuggester {
       return
     }
     this.clear()
-    const entities = twitterText.extractEntitiesWithIndices(text)
+    const entities = extractEntitiesWithIndices(text)
     const entity = entities.find(entity => entity.indices[1] === cursor)
     if (!entity) {
       return
